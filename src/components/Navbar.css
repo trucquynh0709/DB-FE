@@ -1,0 +1,111 @@
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  padding: 0 40px;
+  min-height: 65px;
+  top:0;
+  /* position: fixed; */
+  width: 95%;
+  z-index: 1000;
+  font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar__logo img {
+  height: 55px;
+  width: auto;
+}
+
+.navbar__brand {
+  font-weight: 500;
+  color: #0B1767;
+  font-size: 20px;
+  line-height: 1.1;
+  font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  font-weight: bold;
+}
+
+.navbar__subtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+.navbar__menu {
+  display: flex;
+  gap: 0px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  justify-content: center;
+}
+
+.navbar__menu li {
+  display: inline-block;
+  margin-left: 50px;
+  /* padding-top: 23px; */
+  position: relative;
+}
+
+.navbar__menu a {
+  color: #444;
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 400;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.navbar__menu a:hover {
+  background-color: #0B1767;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  /* transform: translateY(-2px); */
+}
+
+.navbar__menu a::before {
+  display: none;
+}
+
+.navbar__menu a:hover::before {
+  display: none;
+}
+
+.navbar__menu a {
+  color: #111;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+
+.navbar__login {
+  display: flex;
+  align-items: center;
+}
+
+.navbar__login-btn {
+  background: #0B1767;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 32px;
+  font-size: 17px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.navbar__login-btn:hover {
+  background: #bddcfc;
+  color:#444;
+}
