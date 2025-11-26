@@ -7,12 +7,14 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar__logo">
-        
-        
+        <Link to="/" className="navbar__logo-link">
+          {/* You can add logo here if needed */}
+        </Link>
       </div>
       <ul className="navbar__menu">
         <li><Link to="/">Trang chủ</Link></li>
-        <li><Link to="/find-job">Dịch Vụ</Link></li>
+        <li><Link to="/find-job">Tìm việc</Link></li>
+        <li><Link to="/services">Dịch Vụ</Link></li>
         <li><Link to="/about">Về chúng tôi</Link></li>
         <li><Link to="/contact">Liên hệ</Link></li>
       </ul>

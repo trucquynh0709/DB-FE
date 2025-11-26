@@ -826,13 +826,15 @@ const FindJobPage = () => {
 
   return (
     <div className="find-job-page">
-      {/* Breadcrumb */}
-      <div className="breadcrumb-section">
+      {/* Page Title Section */}
+      <div className="page-title-section">
         <div className="container">
-          <div className="breadcrumb">
-            <span className="page-title-crumb">Find Job</span>
-            <div className="crumb-trail">
-                <span className="crumb-item">Home</span> / <span className="crumb-item active">Find job</span>
+          <div className="title-breadcrumb-wrapper">
+            <h1 className="page-main-title">Find Job</h1>
+            <div className="breadcrumb-trail">
+              <span className="breadcrumb-item" onClick={() => navigate('/')}>Home</span>
+              <span className="breadcrumb-separator">/</span>
+              <span className="breadcrumb-item active">Find job</span>
             </div>
           </div>
         </div>

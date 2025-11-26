@@ -5,6 +5,54 @@
   position: relative;
 }
 
+/* Page Title Section */
+.page-title-section {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 30px 0;
+  margin-bottom: 0;
+}
+
+.title-breadcrumb-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-main-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a202c;
+  margin: 0;
+}
+
+.breadcrumb-trail {
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  
+}
+
+.breadcrumb-item {
+  color: #64748b;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.breadcrumb-item:hover {
+  color: #3b82f6;
+}
+
+.breadcrumb-item.active {
+  color: #1a202c;
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: #cbd5e0;
+}
+
 /* Filter Sidebar */
 .filter-sidebar {
   position: fixed;
@@ -654,38 +702,6 @@
   padding: 0 20px;
 }
 
-/* Breadcrumb Section */
-.breadcrumb-section {
-  background-color: white;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 20px 0;
-}
-
-.breadcrumb {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.page-title-crumb {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1a202c;
-}
-
-.crumb-trail {
-  font-size: 14px;
-  color: #64748b;
-}
-
-.crumb-item {
-  color: #64748b;
-}
-
-.crumb-item.active {
-  color: #3b82f6;
-}
-
 /* Main Content */
 .main-content {
   padding: 20px 0;
@@ -698,6 +714,7 @@
 
 /* Search Box */
 .search-wrapper {
+  width: 100%;
   margin-bottom: 2px;
   order: -1;
 }
@@ -1466,12 +1483,6 @@
     grid-template-columns: 1fr;
   }
   
-  .breadcrumb {
-    flex-direction: column;
-    gap: 8px;
-    align-items: flex-start;
-  }
-  
   .popular-searches {
     flex-direction: column;
     align-items: flex-start;
@@ -1485,10 +1496,11 @@
   }
   
   .job-card {
-    padding: 20px;
+    padding: 14px;
   }
   
   .search-box-large {
     padding: 16px;
+    
   }
 }
