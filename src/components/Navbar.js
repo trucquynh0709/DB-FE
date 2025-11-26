@@ -7,7 +7,8 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <div className="navbar__logo">
-        <span class="it-blue">IT</span><span class="viec-black">viec</span>
+
+    <span class="it-blue">IT</span><span class="viec-black">viec</span>
       </div>
       <ul className="navbar__menu">
         <li><Link to="/">Trang chủ</Link></li>
