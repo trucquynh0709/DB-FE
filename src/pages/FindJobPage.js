@@ -85,7 +85,7 @@ const FilterSidebar = ({
     <div className={`filter-sidebar ${showFilters ? 'show' : ''}`}>
       {/* Header cố định ở trên */}
       <div className="filter-header">
-        <h3>Filters</h3>
+        <h3>Bộ lọc</h3>
         <button 
           className="close-filters"
           onClick={() => setShowFilters(false)}
@@ -101,11 +101,11 @@ const FilterSidebar = ({
         {(searchTerm || location || filters.industry.length > 0 || filters.jobType.length > 0 || filters.level.length > 0) && (
           <div className="active-filters-section">
             <div className="active-filters-header">
-              <span>Active Filters:</span>
+              <span>Bộ lọc đang áp dụng:</span>
             </div>
             <div className="active-tags">
-              {searchTerm && renderActiveTag(searchTerm, () => setSearchTerm(''), 'Search:')}
-              {location && renderActiveTag(location, () => setLocation(''), 'Loc:')}
+              {searchTerm && renderActiveTag(searchTerm, () => setSearchTerm(''), 'Tìm kiếm:')}
+              {location && renderActiveTag(location, () => setLocation(''), 'Vị trí:')}
               {filters.industry.map(item => renderActiveTag(item, () => toggleFilter('industry', item)))}
               {filters.jobType.map(item => renderActiveTag(item, () => toggleFilter('jobType', item)))}
               {filters.level.map(item => renderActiveTag(item, () => toggleFilter('level', item)))}
@@ -114,7 +114,7 @@ const FilterSidebar = ({
         )}
         
         <div className="filter-section">
-          <h4>Industry</h4>
+          <h4>Ngành nghề</h4>
           <div className="filter-options">
             {['Development', 'Business', 'Finance & Accounting', 'IT & Software', 'Office Productivity', 'Personal Development', 'Design', 'Marketing', 'Photography & Video'].map(industry => (
               <label key={industry} className="filter-option">
@@ -131,12 +131,12 @@ const FilterSidebar = ({
         </div>
 
         <div className="filter-section">
-          <h4>Job Type</h4>
+          <h4>Hình thức làm việc</h4>
           <div className="filter-options">
             {[
-              { value: 'Onsite', label: 'Onsite' },
-              { value: 'Remote', label: 'Remote Job' },
-              { value: 'Hybrid', label: 'Hybrid' }
+              { value: 'Onsite', label: 'Tại văn phòng' },
+              { value: 'Remote', label: 'Làm việc từ xa' },
+              { value: 'Hybrid', label: 'Kết hợp' }
             ].map(type => (
               <label key={type.value} className="filter-option">
                 <input 
@@ -152,13 +152,13 @@ const FilterSidebar = ({
         </div>
 
         <div className="filter-section">
-          <h4>Contract Type</h4>
+          <h4>Loại hợp đồng</h4>
           <div className="filter-options">
             {[
-              { value: 'Fulltime', label: 'Full Time' },
-              { value: 'Parttime', label: 'Part-Time' },
-              { value: 'Internship', label: 'Internship' },
-              { value: 'Contract', label: 'Contract Base' }
+              { value: 'Fulltime', label: 'Toàn thời gian' },
+              { value: 'Parttime', label: 'Bán thời gian' },
+              { value: 'Internship', label: 'Thực tập' },
+              { value: 'Contract', label: 'Theo hợp đồng' }
             ].map(type => (
               <label key={type.value} className="filter-option">
                 <input 
@@ -174,14 +174,14 @@ const FilterSidebar = ({
         </div>
 
         <div className="filter-section">
-          <h4>Experience Level</h4>
+          <h4>Cấp độ kinh nghiệm</h4>
           <div className="filter-options">
             {[
-              { value: 'Fresher', label: 'Fresher' },
-              { value: 'Junior', label: 'Junior' },
-              { value: 'Mid', label: 'Mid-Level' },
-              { value: 'Senior', label: 'Senior' },
-              { value: 'Manager', label: 'Manager' }
+              { value: 'Fresher', label: 'Mới tốt nghiệp' },
+              { value: 'Junior', label: 'Nhân viên' },
+              { value: 'Mid', label: 'Trung cấp' },
+              { value: 'Senior', label: 'Cao cấp' },
+              { value: 'Manager', label: 'Quản lý' }
             ].map(level => (
               <label key={level.value} className="filter-option">
                 <input 
@@ -198,7 +198,7 @@ const FilterSidebar = ({
 
         {/* Salary Range Section */}
         <div className="filter-section">
-          <h4>Salary Range (yearly)</h4>
+          <h4>Mức lương (năm)</h4>
           
           {/* Quick Select Buttons */}
           <div className="salary-quick-select">
@@ -240,7 +240,7 @@ const FilterSidebar = ({
               <input 
                 type="number" 
                 min="0"
-                placeholder="Min"
+                placeholder="Tối thiểu"
                 value={filters.salaryRange.min || ''}
                 onChange={(e) => handleSalaryRangeChange('min', e.target.value)}
                 className="salary-simple-input"
@@ -249,7 +249,7 @@ const FilterSidebar = ({
               <input 
                 type="number" 
                 min="0"
-                placeholder="Max"
+                placeholder="Tối đa"
                 value={filters.salaryRange.max || ''}
                 onChange={(e) => handleSalaryRangeChange('max', e.target.value)}
                 className="salary-simple-input"
@@ -273,10 +273,10 @@ const FilterSidebar = ({
           disabled={!canApply}
           style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}
         >
-          <span>Apply Filter</span>
+          <span>Áp dụng bộ lọc</span>
         </button>
         <button className="btn-clear" onClick={clearFilters}>
-          Clear All
+          Xóa tất cả
         </button>
       </div>
     </div>
@@ -830,11 +830,11 @@ const FindJobPage = () => {
       <div className="page-title-section">
         <div className="container">
           <div className="title-breadcrumb-wrapper">
-            <h1 className="page-main-title">Find Job</h1>
+            <h1 className="page-main-title">Tìm việc làm</h1>
             <div className="breadcrumb-trail">
-              <span className="breadcrumb-item" onClick={() => navigate('/')}>Home</span>
+              <span className="breadcrumb-item" onClick={() => navigate('/')}>Trang chủ</span>
               <span className="breadcrumb-separator">/</span>
-              <span className="breadcrumb-item active">Find job</span>
+              <span className="breadcrumb-item active">Tìm việc</span>
             </div>
           </div>
         </div>
@@ -851,7 +851,7 @@ const FindJobPage = () => {
                 <span className="icon"><SearchIcon /></span>
                 <input 
                   type="text" 
-                  placeholder="Job title, Position, Keyword..." 
+                  placeholder="Tên công việc, vị trí, từ khóa..." 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -861,7 +861,7 @@ const FindJobPage = () => {
                 <span className="icon"><MapPinIcon /></span>
                 <input 
                   type="text" 
-                  placeholder="City, state or zip code" 
+                  placeholder="Thành phố, tỉnh thành" 
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
@@ -873,10 +873,10 @@ const FindJobPage = () => {
                   className="btn-filters"
                   onClick={() => setShowFilters(!showFilters)}
                 >
-                  <FilterIcon /> Filters
+                  <FilterIcon /> Bộ lọc
                 </button>
                 <button type="submit" className="btn-find" disabled={loading}>
-                  {loading ? 'Searching...' : 'Find Job'}
+                  {loading ? 'Đang tìm...' : 'Tìm việc'}
                 </button>
               </div>
             </form>
@@ -884,7 +884,7 @@ const FindJobPage = () => {
 
           {/* Popular Searches */}
           <div className="popular-searches">
-            <span className="popular-label">Popular searches:</span>
+            <span className="popular-label">Tìm kiếm phổ biến:</span>
             <div className="popular-tags">
               {popularSearches.map((search, index) => (
                 <button 
@@ -959,7 +959,7 @@ const FindJobPage = () => {
                 
                 <div className="card-meta">
                   <span className={getJobTypeClass(job.JobType)}>{job.JobType}</span>
-                  <span className="salary">Salary: {job.Salary}</span>
+                  <span className="salary">Mức lương: {job.Salary}</span>
                 </div>
 
                 <div className="card-footer">

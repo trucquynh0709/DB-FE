@@ -139,7 +139,7 @@ The role will involve translating project specifications into clean, test-driven
   if (loading) {
     return (
       <div className="job-details-container">
-        <div className="loading">Loading...</div>
+        <div className="loading">Đang tải...</div>
       </div>
     );
   }
@@ -147,7 +147,7 @@ The role will involve translating project specifications into clean, test-driven
   if (error) {
     return (
       <div className="job-details-container">
-        <div className="error">Error: {error}</div>
+        <div className="error">Lỗi: {error}</div>
       </div>
     );
   }
@@ -155,7 +155,7 @@ The role will involve translating project specifications into clean, test-driven
   if (!job) {
     return (
       <div className="job-details-container">
-        <div className="not-found">Job not found</div>
+        <div className="not-found">Không tìm thấy công việc</div>
       </div>
     );
   }
@@ -182,11 +182,11 @@ The role will involve translating project specifications into clean, test-driven
     <div className="job-details-container">
       {/* Breadcrumb */}
       <div className="breadcrumb">
-        <span onClick={() => navigate('/')} className="breadcrumb-link">Home</span>
+        <span onClick={() => navigate('/')} className="breadcrumb-link">Trang chủ</span>
         <span className="breadcrumb-separator">/</span>
-        <span onClick={() => navigate('/find-job')} className="breadcrumb-link">Find Job</span>
+        <span onClick={() => navigate('/find-job')} className="breadcrumb-link">Tìm việc</span>
         <span className="breadcrumb-separator">/</span>
-        <span className="breadcrumb-current">Job Details</span>
+        <span className="breadcrumb-current">Chi tiết công việc</span>
       </div>
 
       {/* Job Header */}
@@ -213,7 +213,7 @@ The role will involve translating project specifications into clean, test-driven
             <i className="icon-bookmark"></i>
           </button>
           <button className="btn-apply">
-            Apply Now
+            Ứng tuyển ngay
             <i className="icon-arrow-right"></i>
           </button>
         </div>
@@ -224,7 +224,7 @@ The role will involve translating project specifications into clean, test-driven
         {/* Left Column - Job Description */}
         <div className="job-left-column">
           <section className="job-section">
-            <h2 className="section-title">Job Description</h2>
+            <h2 className="section-title">Mô tả công việc</h2>
             <div className="job-description">
               {job.JD}
             </div>
@@ -233,7 +233,7 @@ The role will involve translating project specifications into clean, test-driven
           {/* Required Skills */}
           {job.requiredSkills && job.requiredSkills.length > 0 && (
             <section className="job-section">
-              <h2 className="section-title">Required Skills</h2>
+              <h2 className="section-title">Kỹ năng yêu cầu</h2>
               <div className="skills-list">
                 {job.requiredSkills.map((skill, index) => (
                   <div key={index} className="skill-item">
@@ -249,10 +249,10 @@ The role will involve translating project specifications into clean, test-driven
 
           {/* Share this job */}
           <section className="job-section">
-            <h2 className="section-title">Share this job:</h2>
+            <h2 className="section-title">Chia sẻ công việc:</h2>
             <div className="share-buttons">
               <button onClick={copyJobLink} className="share-btn share-copy">
-                <i className="icon-link"></i> Copy Links
+                <i className="icon-link"></i> Sao chép liên kết
               </button>
               <button className="share-btn share-facebook">
                 <i className="icon-facebook"></i>
@@ -269,7 +269,7 @@ The role will involve translating project specifications into clean, test-driven
           {/* Job tags */}
           {job.categories && job.categories.length > 0 && (
             <section className="job-section">
-              <h2 className="section-title">Job tags:</h2>
+              <h2 className="section-title">Từ khóa công việc:</h2>
               <div className="job-tags">
                 {job.categories.map((category, index) => (
                   <span key={index} className="tag">{category.JCName}</span>
@@ -286,22 +286,22 @@ The role will involve translating project specifications into clean, test-driven
             <div className="info-card">
               <div className="info-icon">💰</div>
               <div className="info-content">
-                <div className="info-label">Salary (USD)</div>
+                <div className="info-label">Mức lương (USD)</div>
                 <div className="info-value">{formatSalary(job.SalaryFrom, job.SalaryTo)}</div>
-                <div className="info-sublabel">Yearly salary</div>
+                <div className="info-sublabel">Lương theo năm</div>
               </div>
             </div>
             <div className="info-card">
               <div className="info-icon">📍</div>
               <div className="info-content">
-                <div className="info-label">Job Location</div>
+                <div className="info-label">Địa điểm làm việc</div>
                 <div className="info-value">{job.Location}</div>
               </div>
             </div>
             <div className="info-card">
               <div className="info-icon">💼</div>
               <div className="info-content">
-                <div className="info-label">Remote Job</div>
+                <div className="info-label">Hình thức làm việc</div>
                 <div className="info-value">{job.JobType}</div>
               </div>
             </div>
@@ -309,41 +309,41 @@ The role will involve translating project specifications into clean, test-driven
 
           {/* Job Overview */}
           <section className="job-overview">
-            <h2 className="section-title">Job Overview</h2>
+            <h2 className="section-title">Tổng quan công việc</h2>
             <div className="overview-items">
               <div className="overview-item">
                 <div className="overview-icon">📅</div>
                 <div className="overview-content">
-                  <div className="overview-label">JOB POSTED:</div>
+                  <div className="overview-label">NGÀY ĐĂNG:</div>
                   <div className="overview-value">{formatDate(job.PostDate)}</div>
                 </div>
               </div>
               <div className="overview-item">
                 <div className="overview-icon">⏰</div>
                 <div className="overview-content">
-                  <div className="overview-label">JOB EXPIRE IN:</div>
+                  <div className="overview-label">HẠN NỘP:</div>
                   <div className="overview-value">{formatDate(job.ExpireDate)}</div>
                 </div>
               </div>
               <div className="overview-item">
                 <div className="overview-icon">📊</div>
                 <div className="overview-content">
-                  <div className="overview-label">JOB LEVEL:</div>
+                  <div className="overview-label">CẤP BẬC:</div>
                   <div className="overview-value">{job.Level}</div>
                 </div>
               </div>
               <div className="overview-item">
                 <div className="overview-icon">📄</div>
                 <div className="overview-content">
-                  <div className="overview-label">EXPERIENCE</div>
-                  <div className="overview-value">{job.RequireExpYear} Years</div>
+                  <div className="overview-label">KINH NGHIỆM</div>
+                  <div className="overview-value">{job.RequireExpYear} Năm</div>
                 </div>
               </div>
               <div className="overview-item">
                 <div className="overview-icon">🎓</div>
                 <div className="overview-content">
-                  <div className="overview-label">EDUCATION</div>
-                  <div className="overview-value">Graduation</div>
+                  <div className="overview-label">HỌC VẤN</div>
+                  <div className="overview-value">Tốt nghiệp</div>
                 </div>
               </div>
             </div>
