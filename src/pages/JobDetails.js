@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchJobById } from '../services/jobService';
+import { 
+  DollarSign, 
+  MapPin, 
+  Briefcase, 
+  Calendar, 
+  Clock, 
+  BarChart3, 
+  FileText, 
+  GraduationCap 
+} from 'lucide-react';
 import '../styles/JobDetails.css';
 
 const JobDetails = () => {
@@ -303,7 +313,9 @@ The role will involve translating project specifications into clean, test-driven
           {/* Salary & Location */}
           <div className="job-info-cards">
             <div className="info-card">
-              <div className="info-icon">💰</div>
+              <div className="info-icon">
+                <DollarSign size={24} />
+              </div>
               <div className="info-content">
                 <div className="info-label">Mức lương (USD)</div>
                 <div className="info-value">{formatSalary(job.SalaryFrom, job.SalaryTo)}</div>
@@ -311,14 +323,18 @@ The role will involve translating project specifications into clean, test-driven
               </div>
             </div>
             <div className="info-card">
-              <div className="info-icon">📍</div>
+              <div className="info-icon">
+                <MapPin size={24} />
+              </div>
               <div className="info-content">
                 <div className="info-label">Địa điểm làm việc</div>
                 <div className="info-value">{job.Location}</div>
               </div>
             </div>
             <div className="info-card">
-              <div className="info-icon">💼</div>
+              <div className="info-icon">
+        <Briefcase size={24} />
+      </div>
               <div className="info-content">
                 <div className="info-label">Hình thức làm việc</div>
                 <div className="info-value">{getJobTypeLabel(job.JobType)}</div>
@@ -331,35 +347,45 @@ The role will involve translating project specifications into clean, test-driven
             <h2 className="section-title">Tổng quan công việc</h2>
             <div className="overview-items">
               <div className="overview-item">
-                <div className="overview-icon">📅</div>
+                <div className="overview-icon">
+          <Calendar size={20} />
+        </div>
                 <div className="overview-content">
                   <div className="overview-label">NGÀY ĐĂNG:</div>
                   <div className="overview-value">{formatDate(job.PostDate)}</div>
                 </div>
               </div>
               <div className="overview-item">
-                <div className="overview-icon">⏰</div>
+                <div className="overview-icon">
+          <Clock size={20} />
+        </div>
                 <div className="overview-content">
                   <div className="overview-label">HẠN NỘP:</div>
                   <div className="overview-value">{formatDate(job.ExpireDate)}</div>
                 </div>
               </div>
               <div className="overview-item">
-                <div className="overview-icon">📊</div>
+                <div className="overview-icon">
+          <BarChart3 size={20} />
+        </div>
                 <div className="overview-content">
                   <div className="overview-label">CẤP BẬC:</div>
                   <div className="overview-value">{job.Level}</div>
                 </div>
               </div>
               <div className="overview-item">
-                <div className="overview-icon">📄</div>
+                <div className="overview-icon">
+          <FileText size={20} />
+        </div>
                 <div className="overview-content">
                   <div className="overview-label">KINH NGHIỆM</div>
                   <div className="overview-value">{job.RequireExpYear} Năm</div>
                 </div>
               </div>
               <div className="overview-item">
-                <div className="overview-icon">🎓</div>
+                <div className="overview-icon">
+          <GraduationCap size={20} />
+        </div>
                 <div className="overview-content">
                   <div className="overview-label">HỌC VẤN</div>
                   <div className="overview-value">Tốt nghiệp</div>

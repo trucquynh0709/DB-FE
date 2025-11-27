@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/ApplyJobPage.css';
+import { 
+  Building2, 
+  Users, 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  Briefcase, 
+  GraduationCap 
+} from 'lucide-react';
 
 const ApplyJobPage = () => {
   const { jobId } = useParams();
@@ -383,14 +392,18 @@ const ApplyJobPage = () => {
             
             <div className="company-details">
               <div className="detail-row">
-                <span className="detail-icon">🏢</span>
+                <span className="detail-icon">
+      <Building2 size={20} strokeWidth={2} />
+    </span>
                 <div className="detail-content">
                   <span className="detail-label">Loại tổ chức:</span>
                   <span className="detail-value">Private Company</span>
                 </div>
               </div>
               <div className="detail-row">
-                <span className="detail-icon">👥</span>
+                <span className="detail-icon">
+      <Users size={20} strokeWidth={2} />
+    </span>
                 <div className="detail-content">
                   <span className="detail-label">Quy mô công ty:</span>
                   <span className="detail-value">
@@ -404,14 +417,18 @@ const ApplyJobPage = () => {
           {/* Job Overview Card */}
           <div className="job-overview-card">
             <div className="overview-item">
-              <span className="overview-icon">📅</span>
+              <span className="overview-icon">
+      <Calendar size={18} strokeWidth={2} />
+    </span>
               <div className="overview-content">
                 <span className="overview-label">NGÀY ĐĂNG:</span>
                 <span className="overview-value">{formatDate(jobDetails.PostDate)}</span>
               </div>
             </div>
             <div className="overview-item">
-              <span className="overview-icon">⏰</span>
+              <span className="overview-icon">
+      <Clock size={18} strokeWidth={2} />
+    </span>
               <div className="overview-content">
                 <span className="overview-label">HẠN NỘP:</span>
                 <span className="overview-value">
@@ -420,21 +437,27 @@ const ApplyJobPage = () => {
               </div>
             </div>
             <div className="overview-item">
-              <span className="overview-icon">📍</span>
+              <span className="overview-icon">
+      <MapPin size={18} strokeWidth={2} />
+    </span>
               <div className="overview-content">
                 <span className="overview-label">ĐỊA ĐIỂM:</span>
                 <span className="overview-value">{jobDetails.Location}</span>
               </div>
             </div>
             <div className="overview-item">
-              <span className="overview-icon">💼</span>
+              <span className="overview-icon">
+      <Briefcase size={18} strokeWidth={2} />
+    </span>
               <div className="overview-content">
                 <span className="overview-label">LOẠI CÔNG VIỆC:</span>
                 <span className="overview-value">{getContractTypeLabel(jobDetails.ContractType)}</span>
               </div>
             </div>
             <div className="overview-item">
-              <span className="overview-icon">🎓</span>
+              <span className="overview-icon">
+      <GraduationCap size={18} strokeWidth={2} />
+    </span>
               <div className="overview-content">
                 <span className="overview-label">HỌC VẤN</span>
                 <span className="overview-value">Tốt nghiệp</span>

@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../styles/FindJobPage.css';
+import { 
+  Briefcase,
+  MapPin, 
+  Clock,
+} from 'lucide-react';
 
 // SVG Icons components
 const SearchIcon = () => (
@@ -10,12 +15,12 @@ const SearchIcon = () => (
   </svg>
 );
 
-const MapPinIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
-    <circle cx="12" cy="10" r="3"></circle>
-  </svg>
-);
+// const MapPinIcon = () => (
+//   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+//     <path strokeLinecap="round" strokeLinejoin="round" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+//     <circle cx="12" cy="10" r="3"></circle>
+//   </svg>
+// );
 
 const FilterIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -796,13 +801,16 @@ const FindJobPage = () => {
           </div>
           <div className="tooltip-meta">
             <div className="tooltip-location">
-              📍 {currentJobDetails.workLocation || job.location}
+              <MapPin size={16} strokeWidth={2} className="inline mr-1" />
+               {currentJobDetails.workLocation || job.location}
             </div>
             <div className="tooltip-experience">
-              💼 {currentJobDetails.experience || '1-3 năm'}
+              <Briefcase size={16} strokeWidth={2} className="inline mr-1" />
+               {currentJobDetails.experience || '1-3 năm'}
             </div>
             <div className="tooltip-deadline">
-              ⏰ {currentJobDetails.applicationDeadline || 'Còn 30 ngày'}
+              <Clock size={16} strokeWidth={2} className="inline mr-1" />
+               {currentJobDetails.applicationDeadline || 'Còn 30 ngày'}
             </div>
           </div>
         </div>
@@ -886,7 +894,9 @@ const FindJobPage = () => {
               </div>
               <div className="divider"></div>
               <div className="input-group">
-                <span className="icon"><MapPinIcon /></span>
+                <span className="icon inline-flex items-center">
+  <MapPin size={16} strokeWidth={2} className="text-indigo-600" />
+</span>
                 <input 
                   type="text" 
                   placeholder="Thành phố, tỉnh thành" 
@@ -1001,7 +1011,8 @@ const FindJobPage = () => {
                     <div className="info-text">
                       <div className="company-name">{job.CompanyName}</div>
                       <div className="location">
-                        <span className="pin-icon">📍</span> {job.Location}
+                       <MapPin size={16} strokeWidth={2} className="text-indigo-600" />
+                        {job.Location}
                       </div>
                     </div>
                   </div>
