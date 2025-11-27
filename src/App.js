@@ -11,6 +11,8 @@ import EmployerLanding from "./pages/EmployerLanding";
 import RegisterEmployer from "./pages/RegisterEmployer";
 import SignInEmployer from "./pages/SignInEmployer";
 import PricingPlans from "./pages/EmployerPricing";
+import EmployerDashboard from "./pages/EmployerDashboard";
+
 function App() {
   console.log("App rendered");
   return (
@@ -26,6 +28,7 @@ function App() {
         <Route path="/register-employer" element={<RegisterEmployer />} />
          <Route path="/signin-employer" element={<SignInEmployer />} />
          <Route path="/pricing-plans" element={<PricingPlans/>} />
+         <Route path="/employer-dashboard" element={<EmployerDashboard />} />
         
         
       </Routes>
