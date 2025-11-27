@@ -20,7 +20,12 @@
     "icon": "file",
     "number": "7,532",
     "label": "New Jobs"
-  }
+  },
+  {
+     "icon": "check-circle",
+     "number": "45,832",
+     "label": "Successful Hires"
+   }
 ]
 ```
 
@@ -135,7 +140,20 @@
         "Views": 150,
         "featured": true,
         "urgent": false,
-        "JobStatus": "published"
+        "JobStatus": "published",
+        "statistics": [
+  {
+    "label": "Total Applications",
+    "number": "87"
+  },
+  {
+    "label": "Approved Applications",
+    "number": "12"
+  },
+  {
+    "label": "Declined Applications",
+    "number": "68"
+  }]
       }
     ],
     "pagination": {
@@ -277,3 +295,48 @@
   "message": "Job status retrieved successfully"
 }
 ```
+
+## 9. GET /api/candidate/dashboard - Check User Status
+
+### Success Response (200)
+```json
+{
+  "user": {
+    "name": "Nguyễn Văn A",
+    "avatar": "https://...",
+    "profileCompletion": 68
+  },
+  "stats": {
+    "appliedJobs": 589,
+    "favoriteJobs": 238,
+    "jobAlerts": 574
+  },
+  "recentApplications": [
+    {
+      "id": 123,
+      "jobId": 456,
+      "title": "Kỹ sư Mạng",
+      "company": "TechViet",
+      "logo": "https://...",
+      "location": "Hà Nội",
+      "salary": "Thoả thuận",
+      "type": "Remote",
+      "appliedAt": "2025-08-10T10:00:00Z",
+      "status": "pending" // hoặc "interview", "rejected", "accepted"
+    }
+  ]
+}
+```
+## 10. POST /api/candidate/logout
+
+## 11. GET /api/candidate/applications (cho nút “Xem tất cả”)
+```json
+{
+  "applications": [ ...danh sách đầy đủ... ],
+  "pagination": {
+    "total": 589,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 30
+  }
+}
