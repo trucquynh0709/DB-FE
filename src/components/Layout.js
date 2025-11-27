@@ -1,14 +1,26 @@
+// Layout.jsx
 import React from "react";
-
+import { useLocation } from "react-router-dom";
 import Navbar from "./Navbar";
-import Footer from "./Footer"
+import Footer from "./Footer";
 
-const Layout = ({ children }) => (
-  <div>
-    <Navbar />
-    {children}
-    <Footer/>
-  </div>
-);
+const Layout = ({ children }) => {
+  const location = useLocation();
+  
+  // Danh sách các trang KHÔNG có Navbar + Footer
+  const noLayoutPaths = ['/signin', '/register', '/employer/register', '/signup'];
+
+  const shouldShowLayout = !noLayoutPaths.includes(location.pathname);
+
+  return shouldShowLayout ? (
+    <div>
+      <Navbar />
+      <main>{children}</main>
+      <Footer />
+    </div>
+  ) : (
+    <>{children}</>
+  );
+};
 
 export default Layout;

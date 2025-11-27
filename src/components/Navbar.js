@@ -16,7 +16,7 @@ const Navbar = () => {
         <li><Link to="/about">Hỗ trợ</Link></li>
       </ul>
       <div className="navbar__login">
-        <Link to="/login" className="navbar__login-btn">Đăng nhập</Link>
+        <Link to="/signin" className="navbar__login-btn">Đăng nhập</Link>
       </div>
       <div className="navbar__login">
         <Link to="/login" className="navbar__login_employer-btn">Đăng tuyển</Link>

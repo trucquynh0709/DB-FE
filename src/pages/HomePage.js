@@ -58,7 +58,7 @@ const Homepage = () => {
     fetchStats();
   }, [API_BASE_URL]);
 
-  // Fetch Categories (ĐÃ FIX TÊN ICON + DỮ LIỆU JOB)
+  // Fetch Categories
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -112,7 +112,7 @@ const Homepage = () => {
     return icons[iconName?.toLowerCase()] || <Briefcase size={32} />;
   };
 
-// Fetch Top Companies – ĐÃ FIX 100% LỖI
+// Fetch Top Companies
 useEffect(() => {
   const fetchTopCompanies = async () => {
     let companiesData = [];
@@ -134,7 +134,6 @@ useEffect(() => {
 
     } catch (error) {
       console.log('Lỗi fetch companies → dùng fallback:', error);
-      // Không làm gì ở đây cả, để dùng fallback bên dưới
     }
 
     // === FALLBACK DATA (khi API lỗi hoặc chưa có) ===
@@ -175,7 +174,6 @@ useEffect(() => {
     { icon: <CheckCircle size={40} />, title: 'Apply job', desc: 'Ứng tuyển chỉ với 1 click' }
   ];
 
-  // Lấy tổng số job (fix lỗi không cập nhật)
   const liveJobsCount = stats.find(s => s.label === 'Live Job')?.number?.replace(/,/g, '') || '175324';
 
   return (
@@ -222,7 +220,6 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Stats, How it works, Categories... giữ nguyên cấu trúc */}
       {/* Stats Section */}
       <section className="stats">
         <div className="container">
@@ -264,7 +261,6 @@ useEffect(() => {
         </div>
       </section>
 
-      {/* Popular Category - ĐÃ FIX HOÀN TOÀN */}
       <section className="popular-category">
         <div className="container">
           <div className="section-header">
