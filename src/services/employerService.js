@@ -1,4 +1,5 @@
-// Employer API Service
+// Employer API Service - Aligned with Database Schema
+// Schema tables: employer, job, company, package, follow, apply, notification
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 // Get authentication token from localStorage or context
@@ -7,6 +8,7 @@ const getAuthToken = () => {
 };
 
 // Get employer dashboard statistics
+// Schema: employer table có NumberOfOpenedJob, còn savedCandidates từ bảng follow
 export const getEmployerStats = async (employerId) => {
   try {
     const response = await fetch(`${API_BASE_URL}/employer/${employerId}/stats`, {
@@ -22,6 +24,7 @@ export const getEmployerStats = async (employerId) => {
     }
 
     const data = await response.json();
+    // Expected response: { NumberOfOpenedJob, totalFollowers }
     return data;
   } catch (error) {
     console.error('Error fetching employer stats:', error);
@@ -30,12 +33,14 @@ export const getEmployerStats = async (employerId) => {
 };
 
 // Get employer's posted jobs
+// Schema: job table fields: JobID, JobName, JobType, ContractType, Level, Quantity,
+// SalaryFrom, SalaryTo, RequiredExpYear, Location, PostDate, ExpireDate, JobStatus, NumberOfApplicant
 export const getEmployerJobs = async (employerId, params = {}) => {
   try {
     const queryParams = new URLSearchParams({
       page: params.page || 1,
       limit: params.limit || 10,
-      status: params.status || 'all', // 'active', 'expired', 'all'
+      status: params.status || 'all', // 'Active', 'Đã đóng', 'all'
       ...params
     });
 
@@ -60,12 +65,14 @@ export const getEmployerJobs = async (employerId, params = {}) => {
 };
 
 // Get job applications for a specific job
+// Schema: apply table có CandidateID, JobID, upLoadCV, CoverLetter, Status_apply
+// Status_apply default: 'Dang duyet'
 export const getJobApplications = async (jobId, params = {}) => {
   try {
     const queryParams = new URLSearchParams({
       page: params.page || 1,
       limit: params.limit || 20,
-      status: params.status || 'all', // 'Dang duyet', 'Duyet', 'Tu choi', 'all'
+      status: params.status || 'all', // 'Dang duyet', other statuses, 'all'
       ...params
     });
 
@@ -119,6 +126,10 @@ export const getSavedCandidates = async (employerId, params = {}) => {
 };
 
 // Post a new job
+// Schema: job table - JobName (max 20), JD (max 500), JobType, ContractType, Level,
+// Quantity (>=1), SalaryFrom (>0), SalaryTo (>SalaryFrom), RequiredExpYear, Location (max 30),
+// PostDate, ExpireDate (>PostDate), JobStatus, NumberOfApplicant (default 0), EmployerID
+// Relations: job_category (in table), skill (require table)
 export const postJob = async (jobData) => {
   try {
     const response = await fetch(`${API_BASE_URL}/jobs`, {
@@ -143,6 +154,7 @@ export const postJob = async (jobData) => {
 };
 
 // Update job status (mark as expired, activate, etc.)
+// Schema: JobStatus in job table (varchar 10)
 export const updateJobStatus = async (jobId, status) => {
   try {
     const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/status`, {
@@ -151,7 +163,7 @@ export const updateJobStatus = async (jobId, status) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getAuthToken()}`
       },
-      body: JSON.stringify({ JobStatus: status }),
+      body: JSON.stringify({ JobStatus: status }), // e.g., 'Active', 'Đã đóng'
     });
 
     if (!response.ok) {
@@ -307,6 +319,7 @@ export const getPackageInfo = async (packageName) => {
 };
 
 // Update application status
+// Schema: apply table - Status_apply (varchar 20, default 'Dang duyet')
 export const updateApplicationStatus = async (candidateId, jobId, status) => {
   try {
     const response = await fetch(`${API_BASE_URL}/applications/${jobId}/${candidateId}/status`, {
@@ -315,7 +328,7 @@ export const updateApplicationStatus = async (candidateId, jobId, status) => {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getAuthToken()}`
       },
-      body: JSON.stringify({ Status_apply: status }), // 'Dang duyet', 'Duyet', 'Tu choi'
+      body: JSON.stringify({ Status_apply: status }), // 'Dang duyet' or other values
     });
 
     if (!response.ok) {
@@ -331,15 +344,20 @@ export const updateApplicationStatus = async (candidateId, jobId, status) => {
 };
 
 // Save/Follow a candidate
+// Schema: follow table có CandidateID, EmployerID
 export const toggleFollowCandidate = async (employerId, candidateId, isFollowing) => {
   try {
     const method = isFollowing ? 'DELETE' : 'POST';
-    const response = await fetch(`${API_BASE_URL}/employer/${employerId}/follow/${candidateId}`, {
+    const response = await fetch(`${API_BASE_URL}/follow`, {
       method,
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${getAuthToken()}`
       },
+      body: method === 'POST' ? JSON.stringify({
+        CandidateID: candidateId,
+        EmployerID: employerId
+      }) : null,
     });
 
     if (!response.ok) {
@@ -355,6 +373,8 @@ export const toggleFollowCandidate = async (employerId, candidateId, isFollowing
 };
 
 // Get notifications for employer
+// Schema: notification table có nID, Title (max 30), Content (max 200), Time,
+// CandidateID, EmployerID, JobID
 export const getNotifications = async (employerId, params = {}) => {
   try {
     const queryParams = new URLSearchParams({
@@ -363,7 +383,7 @@ export const getNotifications = async (employerId, params = {}) => {
       ...params
     });
 
-    const response = await fetch(`${API_BASE_URL}/employer/${employerId}/notifications?${queryParams}`, {
+    const response = await fetch(`${API_BASE_URL}/notifications/employer/${employerId}?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

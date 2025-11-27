@@ -28,6 +28,7 @@ import {
 //   getEmployerJobs,
 //   updateJobStatus 
 // } from '../services/employerService';
+import PostJob from './PostJob';
 import '../styles/EmployerDashboard.css';
 
 const EmployerDashboard = () => {
@@ -41,72 +42,78 @@ const EmployerDashboard = () => {
   const employerId = localStorage.getItem('employerId') || 1; // Default for testing
 
   // Hardcoded data - replace with API when ready
+  // Schema: employer table có NumberOfOpenedJob, follow table cho savedCandidates
   const [stats, setStats] = useState({
-    openJobs: 589,
-    savedCandidates: 2517
+    NumberOfOpenedJob: 589,
+    totalFollowers: 2517
   });
 
   const [recentJobs, setRecentJobs] = useState([
     {
-      id: 1,
-      title: 'UI/UX Designer',
-      type: 'Full Time',
-      contractType: 'Permanent',
+      JobID: 1,
+      JobName: 'UI/UX Designer',
+      JobType: 'Fulltime',
+      ContractType: 'Fulltime',
       daysRemaining: 27,
-      status: 'Active',
-      applications: 798,
-      postDate: '01/11/2025',
-      location: 'Hà Nội',
-      salary: '15,000,000 - 25,000,000 VNĐ'
+      JobStatus: 'Active',
+      NumberOfApplicant: 798,
+      PostDate: '01/11/2025',
+      Location: 'Hà Nội',
+      SalaryFrom: 15000000,
+      SalaryTo: 25000000
     },
     {
-      id: 2,
-      title: 'Senior UX Designer',
-      type: 'Internship',
-      contractType: 'Contract',
+      JobID: 2,
+      JobName: 'Senior UX Designer',
+      JobType: 'Hybrid',
+      ContractType: 'Fulltime',
       daysRemaining: 8,
-      status: 'Active',
-      applications: 185,
-      postDate: '10/11/2025',
-      location: 'TP.HCM',
-      salary: '20,000,000 - 35,000,000 VNĐ'
+      JobStatus: 'Active',
+      NumberOfApplicant: 185,
+      PostDate: '10/11/2025',
+      Location: 'TP. Hồ Chí Minh',
+      SalaryFrom: 20000000,
+      SalaryTo: 35000000
     },
     {
-      id: 3,
-      title: 'Technical Support Specialist',
-      type: 'Part Time',
-      contractType: 'Freelance',
+      JobID: 3,
+      JobName: 'Tech Support',
+      JobType: 'Parttime',
+      ContractType: 'Parttime',
       daysRemaining: 4,
-      status: 'Active',
-      applications: 556,
-      postDate: '15/11/2025',
-      location: 'Đà Nẵng',
-      salary: '10,000,000 - 18,000,000 VNĐ'
+      JobStatus: 'Active',
+      NumberOfApplicant: 556,
+      PostDate: '15/11/2025',
+      Location: 'Đà Nẵng',
+      SalaryFrom: 10000000,
+      SalaryTo: 18000000
     },
     {
-      id: 4,
-      title: 'Junior Graphic Designer',
-      type: 'Full Time',
-      contractType: 'Permanent',
+      JobID: 4,
+      JobName: 'Junior Designer',
+      JobType: 'Onsite',
+      ContractType: 'Fulltime',
       daysRemaining: 24,
-      status: 'Active',
-      applications: 583,
-      postDate: '05/11/2025',
-      location: 'Hà Nội',
-      salary: '8,000,000 - 15,000,000 VNĐ'
+      JobStatus: 'Active',
+      NumberOfApplicant: 583,
+      PostDate: '05/11/2025',
+      Location: 'Hà Nội',
+      SalaryFrom: 8000000,
+      SalaryTo: 15000000
     },
     {
-      id: 5,
-      title: 'Front End Developer',
-      type: 'Full Time',
-      contractType: 'Permanent',
+      JobID: 5,
+      JobName: 'Front End Dev',
+      JobType: 'Remote',
+      ContractType: 'Fulltime',
       daysRemaining: 0,
-      status: 'Expire',
-      applications: 740,
-      expired: '07/12/2019',
-      postDate: '07/11/2019',
-      location: 'TP.HCM',
-      salary: '18,000,000 - 30,000,000 VNĐ'
+      JobStatus: 'Đã đóng',
+      NumberOfApplicant: 740,
+      ExpireDate: '20/11/2025',
+      PostDate: '07/11/2025',
+      Location: 'TP. Hồ Chí Minh',
+      SalaryFrom: 18000000,
+      SalaryTo: 30000000
     }
   ]);
 
@@ -169,7 +176,7 @@ const EmployerDashboard = () => {
   const handleMarkAsExpired = async (jobId) => {
     // Hardcoded version - update local state only
     const updatedJobs = recentJobs.map(job => 
-      job.id === jobId ? { ...job, status: 'Expire', daysRemaining: 0 } : job
+      job.JobID === jobId ? { ...job, JobStatus: 'Đã đóng', daysRemaining: 0 } : job
     );
     setRecentJobs(updatedJobs);
     setShowJobActions(null);
@@ -177,24 +184,28 @@ const EmployerDashboard = () => {
 
     // API version - uncomment when ready
     // try {
-    //   await updateJobStatus(jobId, 'Expired');
+    //   await updateJobStatus(jobId, 'Đã đóng');
     //   // Refresh jobs list
     //   const jobsData = await getEmployerJobs(employerId, { limit: 5 });
     //   const transformedJobs = jobsData.jobs?.map(job => {
     //     const today = new Date();
     //     const expireDate = new Date(job.ExpireDate);
     //     const daysRemaining = Math.ceil((expireDate - today) / (1000 * 60 * 60 * 24));
-    //     const isExpired = job.JobStatus === 'Expired' || daysRemaining < 0;
+    //     const isExpired = job.JobStatus === 'Đã đóng' || daysRemaining < 0;
 
     //     return {
-    //       id: job.JobID,
-    //       title: job.JobName,
-    //       type: job.JobType,
-    //       contractType: job.ContractType,
+    //       JobID: job.JobID,
+    //       JobName: job.JobName,
+    //       JobType: job.JobType,
+    //       ContractType: job.ContractType,
     //       daysRemaining: daysRemaining > 0 ? daysRemaining : 0,
-    //       status: isExpired ? 'Expire' : 'Active',
-    //       applications: job.NumberOfApplicant || 0,
-    //       expired: isExpired ? new Date(job.ExpireDate).toLocaleDateString('vi-VN') : null
+    //       JobStatus: isExpired ? 'Đã đóng' : 'Active',
+    //       NumberOfApplicant: job.NumberOfApplicant || 0,
+    //       ExpireDate: isExpired ? new Date(job.ExpireDate).toLocaleDateString('vi-VN') : null,
+    //       PostDate: new Date(job.PostDate).toLocaleDateString('vi-VN'),
+    //       Location: job.Location,
+    //       SalaryFrom: job.SalaryFrom,
+    //       SalaryTo: job.SalaryTo
     //     };
     //   }) || [];
     //   setRecentJobs(transformedJobs);
@@ -306,7 +317,10 @@ const EmployerDashboard = () => {
                 <Bell size={20} />
                 <span className="notification-badge">1</span>
               </button>
-              <button className="post-job-btn">
+              <button 
+                className="post-job-btn"
+                onClick={() => setActiveMenu('post-job')}
+              >
                 <PlusCircle size={18} />
                 <span>Đăng tin</span>
               </button>
@@ -328,6 +342,8 @@ const EmployerDashboard = () => {
               <p>{error}</p>
               <button onClick={() => window.location.reload()}>Thử lại</button>
             </div>
+          ) : activeMenu === 'post-job' ? (
+            <PostJob />
           ) : (
             <>
               <div className="greeting">
@@ -342,7 +358,7 @@ const EmployerDashboard = () => {
                 <Briefcase size={28} />
               </div>
               <div className="stat-info">
-                <h3>{stats.openJobs}</h3>
+                <h3>{stats.NumberOfOpenedJob}</h3>
                 <p>Tin đang tuyển</p>
               </div>
             </div>
@@ -351,7 +367,7 @@ const EmployerDashboard = () => {
                 <Users size={28} />
               </div>
               <div className="stat-info">
-                <h3>{stats.savedCandidates}</h3>
+                <h3>{stats.totalFollowers}</h3>
                 <p>Ứng viên đã lưu</p>
               </div>
             </div>
@@ -375,16 +391,16 @@ const EmployerDashboard = () => {
               </div>
 
               {recentJobs.map((job) => (
-                <div key={job.id} className={`table-row ${job.status === 'Expire' ? 'expired' : ''}`}>
+                <div key={job.JobID} className={`table-row ${job.JobStatus === 'Đã đóng' ? 'expired' : ''}`}>
                   <div className="col-job">
-                    <h4>{job.title}</h4>
+                    <h4>{job.JobName}</h4>
                     <p className="job-meta">
-                      {job.type} • {job.status === 'Expire' ? job.expired : `${job.daysRemaining} ngày còn lại`}
+                      {job.JobType} • {job.JobStatus === 'Đã đóng' ? job.ExpireDate : `${job.daysRemaining} ngày còn lại`}
                     </p>
                   </div>
                   <div className="col-status">
-                    <span className={`status-badge ${job.status === 'Active' ? 'active' : 'expired'}`}>
-                      {job.status === 'Active' ? (
+                    <span className={`status-badge ${job.JobStatus === 'Active' ? 'active' : 'expired'}`}>
+                      {job.JobStatus === 'Active' ? (
                         <><CheckCircle2 size={14} /> Đang hoạt động</>
                       ) : (
                         <><XCircle size={14} /> Hết hạn</>
@@ -393,7 +409,7 @@ const EmployerDashboard = () => {
                   </div>
                   <div className="col-applications">
                     <span className="applications-count">
-                      <Users size={16} /> {job.applications} Ứng tuyển
+                      <Users size={16} /> {job.NumberOfApplicant} Ứng tuyển
                     </span>
                   </div>
                   <div className="col-actions">
@@ -406,11 +422,11 @@ const EmployerDashboard = () => {
                     <div className="actions-menu">
                       <button 
                         className="more-btn"
-                        onClick={() => toggleJobActions(job.id)}
+                        onClick={() => toggleJobActions(job.JobID)}
                       >
                         <MoreVertical size={16} />
                       </button>
-                      {showJobActions === job.id && (
+                      {showJobActions === job.JobID && (
                         <div className="dropdown-menu">
                           <button className="dropdown-item">
                             <Rocket size={14} /> Quảng bá
@@ -420,7 +436,7 @@ const EmployerDashboard = () => {
                           </button>
                           <button 
                             className="dropdown-item"
-                            onClick={() => handleMarkAsExpired(job.id)}
+                            onClick={() => handleMarkAsExpired(job.JobID)}
                           >
                             <Ban size={14} /> Hết hạn
                           </button>

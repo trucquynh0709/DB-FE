@@ -1,7 +1,10 @@
-// Job API Service
+// Job API Service - Aligned with Database Schema
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 // Fetch jobs với các filter options
+// Schema: job table có các trường: JobID, JobName, JD, JobType, ContractType, Level, 
+// Quantity, SalaryFrom, SalaryTo, RequiredExpYear, Location, PostDate, ExpireDate, 
+// JobStatus, NumberOfApplicant, EmployerID
 export const fetchJobs = async (params = {}) => {
   try {
     const queryParams = new URLSearchParams({
@@ -52,16 +55,23 @@ export const fetchJobById = async (jobId) => {
 };
 
 // Apply for a job
+// Schema: apply table có các trường: CandidateID, JobID, upLoadCV, CoverLetter, Status_apply
 export const applyForJob = async (jobId, applicationData) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/apply`, {
+    const response = await fetch(`${API_BASE_URL}/apply`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         // Add authorization header if needed
         // 'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(applicationData),
+      body: JSON.stringify({
+        CandidateID: applicationData.candidateId,
+        JobID: jobId,
+        upLoadCV: applicationData.cvPath,
+        CoverLetter: applicationData.coverLetter || null,
+        Status_apply: 'Dang duyet' // Default status
+      }),
     });
 
     if (!response.ok) {
@@ -76,17 +86,23 @@ export const applyForJob = async (jobId, applicationData) => {
   }
 };
 
-// Bookmark/Save job
-export const toggleBookmark = async (jobId, isBookmarked) => {
+// Bookmark/Save job (favorite table in schema)
+// Schema: favourite table có các trường: CandidateID, JobID, Date
+export const toggleBookmark = async (jobId, candidateId, isBookmarked) => {
   try {
     const method = isBookmarked ? 'DELETE' : 'POST';
-    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}/bookmark`, {
+    const response = await fetch(`${API_BASE_URL}/favourite`, {
       method,
       headers: {
         'Content-Type': 'application/json',
         // Add authorization header if needed
         // 'Authorization': `Bearer ${token}`
       },
+      body: JSON.stringify({
+        CandidateID: candidateId,
+        JobID: jobId,
+        Date: new Date().toISOString().split('T')[0]
+      }),
     });
 
     if (!response.ok) {
@@ -102,9 +118,10 @@ export const toggleBookmark = async (jobId, isBookmarked) => {
 };
 
 // Get job categories/filters
+// Schema: job_category table có các trường: JCName, Specialty
 export const fetchJobCategories = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/categories`, {
+    const response = await fetch(`${API_BASE_URL}/job-categories`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -119,6 +136,29 @@ export const fetchJobCategories = async () => {
     return data;
   } catch (error) {
     console.error('Error fetching categories:', error);
+    throw error;
+  }
+};
+
+// Get skills list
+// Schema: skill table có các trường: SkillName, Description
+export const fetchSkills = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/skills`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching skills:', error);
     throw error;
   }
 };
