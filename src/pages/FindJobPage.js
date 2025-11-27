@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../styles/FindJobPage.css';
-import '../utils/scroll.ts'
-import { 
-  Briefcase,
-  MapPin, 
-  Clock,
-} from 'lucide-react';
 
 // SVG Icons components
 const SearchIcon = () => (
@@ -16,12 +10,12 @@ const SearchIcon = () => (
   </svg>
 );
 
-// const MapPinIcon = () => (
-//   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-//     <path strokeLinecap="round" strokeLinejoin="round" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
-//     <circle cx="12" cy="10" r="3"></circle>
-//   </svg>
-// );
+const MapPinIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
+    <circle cx="12" cy="10" r="3"></circle>
+  </svg>
+);
 
 const FilterIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -47,6 +41,17 @@ const preventWheelScroll = (e) => {
   e.preventDefault();
 };
 
+// Helper function để format VNĐ
+const formatVND = (amount) => {
+  if (!amount) return '0';
+  // Chuyển thành triệu
+  const millions = amount / 1000000;
+  if (millions >= 1) {
+    return `${millions.toFixed(0)}tr`;
+  }
+  return `${(amount / 1000).toFixed(0)}k`;
+};
+
 // Component FilterSidebar - Tách ra ngoài để tối ưu performance
 const FilterSidebar = ({ 
   showFilters, 
@@ -64,7 +69,7 @@ const FilterSidebar = ({
   hasFilterChanges
 }) => {
   // Tính toán % để vẽ thanh màu xanh
-  const maxLimit = 200000;
+  const maxLimit = 100000000; // 100 triệu VNĐ
   const getPercent = (value) => Math.round(((value) / maxLimit) * 100);
   const minPercent = getPercent(filters.salaryRange.min);
   const maxPercent = getPercent(filters.salaryRange.max);
@@ -122,7 +127,7 @@ const FilterSidebar = ({
         <div className="filter-section">
           <h4>Ngành nghề</h4>
           <div className="filter-options">
-            {['Development', 'Business', 'Finance & Accounting', 'IT & Software', 'Office Productivity', 'Personal Development', 'Design', 'Marketing', 'Photography & Video'].map(industry => (
+            {['Development', 'Design', 'Marketing', 'IT & Software', 'Business', 'Finance', 'Data Science', 'Mobile', 'DevOps'].map(industry => (
               <label key={industry} className="filter-option">
                 <input 
                   type="checkbox" 
@@ -210,33 +215,33 @@ const FilterSidebar = ({
           <div className="salary-quick-select">
             <button 
               className="quick-btn"
-              onClick={() => setQuickSalaryRange(0, 30000)}
+              onClick={() => setQuickSalaryRange(0, 10000000)}
             >
-              &lt; $30k
+              &lt; 10tr
             </button>
             <button 
               className="quick-btn"
-              onClick={() => setQuickSalaryRange(30000, 50000)}
+              onClick={() => setQuickSalaryRange(10000000, 20000000)}
             >
-              $30k - $50k
+              10-20tr
             </button>
             <button 
               className="quick-btn"
-              onClick={() => setQuickSalaryRange(50000, 80000)}
+              onClick={() => setQuickSalaryRange(20000000, 30000000)}
             >
-              $50k - $80k
+              20-30tr
             </button>
             <button 
               className="quick-btn"
-              onClick={() => setQuickSalaryRange(80000, 120000)}
+              onClick={() => setQuickSalaryRange(30000000, 50000000)}
             >
-              $80k - $120k
+              30-50tr
             </button>
             <button 
               className="quick-btn"
-              onClick={() => setQuickSalaryRange(120000, 200000)}
+              onClick={() => setQuickSalaryRange(50000000, 100000000)}
             >
-              $120k+
+              50tr+
             </button>
           </div>
 
@@ -260,8 +265,9 @@ const FilterSidebar = ({
                 onChange={(e) => handleSalaryRangeChange('max', e.target.value)}
                 className="salary-simple-input"
               />
-              <span className="salary-unit">USD</span>
+              <span className="salary-unit">VNĐ</span>
             </div>
+            <p className="help-text">Nhập số tiền (VD: 15000000 cho 15 triệu)</p>
           </div>
         </div>
         
@@ -307,7 +313,7 @@ const FindJobPage = () => {
     level: [],
     salaryRange: {
       min: 0,
-      max: 200000
+      max: 100000000 // 100 triệu VNĐ
     },
     remoteJob: false
   };
@@ -494,32 +500,35 @@ const FindJobPage = () => {
       console.error('Error fetching jobs:', err);
       
       // Fallback data nếu API lỗi - tổng cộng 18 jobs để test pagination
+      // Schema fields: JobID, JobName, JobType, ContractType, SalaryFrom, SalaryTo, Location, Level, RequiredExpYear
+      // Company fields (JOIN): CName, Logo
+      // Salary in VNĐ, Location in Vietnam
       let allFallbackJobs = [
-        { JobID: 1, JobName: 'Technical Support Specialist', JobType: 'Parttime', ContractType: 'Parttime', Salary: '$20,000 - $25,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Junior', RequireExpYear: 1, featured: false, urgent: false, JobStatus: 'published', Industry: 'IT & Software' },
-        { JobID: 2, JobName: 'Senior UX Designer', JobType: 'Onsite', ContractType: 'Fulltime', Salary: '$25,000 - $30,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Senior', RequireExpYear: 3, featured: true, urgent: false, JobStatus: 'published', Industry: 'Design' },
-        { JobID: 3, JobName: 'Marketing Officer', JobType: 'Hybrid', ContractType: 'Internship', Salary: '$15,000 - $20,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Fresher', RequireExpYear: 0, featured: false, urgent: true, JobStatus: 'published', Industry: 'Marketing' },
-        { JobID: 4, JobName: 'Junior Graphic Designer', JobType: 'Remote', ContractType: 'Internship', Salary: '$18,000 - $22,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Junior', RequireExpYear: 1, featured: false, urgent: false, JobStatus: 'published', Industry: 'Design' },
-        { JobID: 5, JobName: 'Interaction Designer', JobType: 'Remote', ContractType: 'Parttime', Salary: '$22,000 - $26,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Mid', RequireExpYear: 2, featured: false, urgent: false, JobStatus: 'published', Industry: 'Design' },
-        { JobID: 6, JobName: 'Project Manager', JobType: 'Onsite', ContractType: 'Fulltime', Salary: '$35,000 - $40,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Manager', RequireExpYear: 5, featured: true, urgent: false, JobStatus: 'published', Industry: 'Business' },
-        { JobID: 7, JobName: 'Software Engineer', JobType: 'Hybrid', ContractType: 'Fulltime', Salary: '$30,000 - $35,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Mid', RequireExpYear: 3, featured: false, urgent: false, JobStatus: 'published', Industry: 'Development' },
-        { JobID: 8, JobName: 'Visual Designer', JobType: 'Onsite', ContractType: 'Fulltime', Salary: '$28,000 - $32,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Mid', RequireExpYear: 2, featured: false, urgent: false, JobStatus: 'published', Industry: 'Design' },
-        { JobID: 9, JobName: 'UI/UX Designer', JobType: 'Remote', ContractType: 'Fulltime', Salary: '$26,000 - $30,000', CompanyName: 'Google Inc.', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg', Location: 'Dhaka, Bangladesh', Level: 'Mid', RequireExpYear: 2, featured: false, urgent: false, JobStatus: 'published', Industry: 'Design' },
-        { JobID: 10, JobName: 'Product Designer', JobType: 'Hybrid', ContractType: 'Fulltime', Salary: '$30,000 - $35,000', CompanyName: 'Microsoft Corp.', CompanyLogo: 'https://cdn.example.com/logos/microsoft.png', Location: 'Seattle, USA', Level: 'Senior', RequireExpYear: 4, featured: false, urgent: false, JobStatus: 'published', Industry: 'Design' },
-        { JobID: 11, JobName: 'Networking Engineer', JobType: 'Onsite', ContractType: 'Internship', Salary: '$25,000 - $30,000', CompanyName: 'Amazon Inc.', CompanyLogo: 'https://cdn.example.com/logos/amazon.png', Location: 'Austin, USA', Level: 'Junior', RequireExpYear: 1, featured: false, urgent: false, JobStatus: 'published', Industry: 'IT & Software' },
-        { JobID: 12, JobName: 'Frontend Developer', JobType: 'Remote', ContractType: 'Fulltime', Salary: '$35,000 - $40,000', CompanyName: 'Meta Inc.', CompanyLogo: 'https://cdn.example.com/logos/meta.png', Location: 'New York, USA', Level: 'Senior', RequireExpYear: 3, featured: false, urgent: false, JobStatus: 'published', Industry: 'Development' },
-        { JobID: 13, JobName: 'Backend Developer', JobType: 'Hybrid', ContractType: 'Fulltime', Salary: '$40,000 - $45,000', CompanyName: 'Apple Inc.', CompanyLogo: 'https://cdn.example.com/logos/apple.png', Location: 'California, USA', Level: 'Senior', RequireExpYear: 4, featured: true, urgent: false, JobStatus: 'published', Industry: 'Development' },
-        { JobID: 14, JobName: 'Data Scientist', JobType: 'Remote', ContractType: 'Parttime', Salary: '$32,000 - $38,000', CompanyName: 'Tesla Inc.', CompanyLogo: 'https://cdn.example.com/logos/tesla.png', Location: 'Texas, USA', Level: 'Mid', RequireExpYear: 3, featured: false, urgent: false, JobStatus: 'published', Industry: 'IT & Software' },
-        { JobID: 15, JobName: 'DevOps Engineer', JobType: 'Onsite', ContractType: 'Fulltime', Salary: '$38,000 - $42,000', CompanyName: 'Netflix Inc.', CompanyLogo: 'https://cdn.example.com/logos/netflix.png', Location: 'Los Angeles, USA', Level: 'Senior', RequireExpYear: 5, featured: false, urgent: false, JobStatus: 'published', Industry: 'Development' },
-        { JobID: 16, JobName: 'Mobile Developer', JobType: 'Remote', ContractType: 'Internship', Salary: '$18,000 - $22,000', CompanyName: 'Adobe Inc.', CompanyLogo: 'https://cdn.example.com/logos/adobe.png', Location: 'San Jose, USA', Level: 'Fresher', RequireExpYear: 0, featured: false, urgent: false, JobStatus: 'published', Industry: 'Development' },
-        { JobID: 17, JobName: 'QA Engineer', JobType: 'Hybrid', ContractType: 'Parttime', Salary: '$22,000 - $28,000', CompanyName: 'Spotify Inc.', CompanyLogo: 'https://cdn.example.com/logos/spotify.png', Location: 'Stockholm, Sweden', Level: 'Junior', RequireExpYear: 1, featured: false, urgent: false, JobStatus: 'published', Industry: 'IT & Software' },
-        { JobID: 18, JobName: 'System Administrator', JobType: 'Onsite', ContractType: 'Fulltime', Salary: '$28,000 - $32,000', CompanyName: 'LinkedIn Corp.', CompanyLogo: 'https://cdn.example.com/logos/linkedin.png', Location: 'San Francisco, USA', Level: 'Mid', RequireExpYear: 3, featured: false, urgent: false, JobStatus: 'published', Industry: 'IT & Software' }
+        { JobID: 1, JobName: 'Technical Support', JobType: 'Parttime', ContractType: 'Parttime', SalaryFrom: 8000000, SalaryTo: 12000000, CName: 'FPT Software', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/1200px-FPT_logo_2010.svg.png', Location: 'Hà Nội', Level: 'Junior', RequiredExpYear: 1, JobStatus: 'Active', JCName: 'IT & Software' },
+        { JobID: 2, JobName: 'Senior UX Designer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 20000000, SalaryTo: 30000000, CName: 'Viettel Group', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Viettel_logo.svg/1200px-Viettel_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequiredExpYear: 3, JobStatus: 'Active', JCName: 'Design' },
+        { JobID: 3, JobName: 'Marketing Officer', JobType: 'Hybrid', ContractType: 'Internship', SalaryFrom: 5000000, SalaryTo: 8000000, CName: 'VNG Corporation', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/VNG_Corporation_logo.svg/1200px-VNG_Corporation_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Fresher', RequiredExpYear: 0, JobStatus: 'Active', JCName: 'Marketing' },
+        { JobID: 4, JobName: 'Junior Designer', JobType: 'Remote', ContractType: 'Internship', SalaryFrom: 6000000, SalaryTo: 10000000, CName: 'Tiki', Logo: 'https://salt.tikicdn.com/ts/upload/e4/49/6c/270be9859abd5f5ec5071da65fab0a94.png', Location: 'Hà Nội', Level: 'Junior', RequiredExpYear: 1, JobStatus: 'Active', JCName: 'Design' },
+        { JobID: 5, JobName: 'Product Designer', JobType: 'Remote', ContractType: 'Parttime', SalaryFrom: 12000000, SalaryTo: 18000000, CName: 'Shopee', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/1200px-Shopee.svg.png', Location: 'Đà Nẵng', Level: 'Mid', RequiredExpYear: 2, JobStatus: 'Active', JCName: 'Design' },
+        { JobID: 6, JobName: 'Project Manager', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 25000000, SalaryTo: 40000000, CName: 'MB Bank', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/MBBank_logo.svg/1200px-MBBank_logo.svg.png', Location: 'Hà Nội', Level: 'Manager', RequiredExpYear: 5, JobStatus: 'Active', JCName: 'Business' },
+        { JobID: 7, JobName: 'Software Engineer', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 15000000, SalaryTo: 25000000, CName: 'Momo', Logo: 'https://developers.momo.vn/v3/img/logo.svg', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequiredExpYear: 3, JobStatus: 'Active', JCName: 'Development' },
+        { JobID: 8, JobName: 'Visual Designer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 14000000, SalaryTo: 20000000, CName: 'VinID', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Vingroup_logo.svg/1200px-Vingroup_logo.svg.png', Location: 'Hà Nội', Level: 'Mid', RequiredExpYear: 2, JobStatus: 'Active', JCName: 'Design' },
+        { JobID: 9, JobName: 'UI/UX Designer', JobType: 'Remote', ContractType: 'Fulltime', SalaryFrom: 13000000, SalaryTo: 18000000, CName: 'Zalo', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1200px-Icon_of_Zalo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequiredExpYear: 2, JobStatus: 'Active', JCName: 'Design' },
+        { JobID: 10, JobName: 'Full Stack Dev', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 18000000, SalaryTo: 28000000, CName: 'Base.vn', Logo: 'https://base.vn/static/base-logo.svg', Location: 'Hà Nội', Level: 'Senior', RequiredExpYear: 4, JobStatus: 'Active', JCName: 'Development' },
+        { JobID: 11, JobName: 'Network Engineer', JobType: 'Onsite', ContractType: 'Internship', SalaryFrom: 7000000, SalaryTo: 10000000, CName: 'VNPT', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/VNPT_Logo.svg/1200px-VNPT_Logo.svg.png', Location: 'Đà Nẵng', Level: 'Junior', RequiredExpYear: 1, JobStatus: 'Active', JCName: 'IT & Software' },
+        { JobID: 12, JobName: 'Frontend Dev', JobType: 'Remote', ContractType: 'Fulltime', SalaryFrom: 16000000, SalaryTo: 24000000, CName: 'Got It', Logo: 'https://gotitapp.co/assets/img/logo.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequiredExpYear: 3, JobStatus: 'Active', JCName: 'Development' },
+        { JobID: 13, JobName: 'Backend Dev', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 20000000, SalaryTo: 30000000, CName: 'VIB Bank', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/VIB_logo.svg/1200px-VIB_logo.svg.png', Location: 'Hà Nội', Level: 'Senior', RequiredExpYear: 4, JobStatus: 'Active', JCName: 'Development' },
+        { JobID: 14, JobName: 'Data Analyst', JobType: 'Remote', ContractType: 'Parttime', SalaryFrom: 10000000, SalaryTo: 15000000, CName: 'Sendo', Logo: 'https://media.sendo.vn/media/logo/logo.png', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequiredExpYear: 3, JobStatus: 'Active', JCName: 'IT & Software' },
+        { JobID: 15, JobName: 'DevOps Engineer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 22000000, SalaryTo: 35000000, CName: 'BAEMIN', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Baemin_logo.svg/1200px-Baemin_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequiredExpYear: 5, JobStatus: 'Active', JCName: 'Development' },
+        { JobID: 16, JobName: 'Mobile Developer', JobType: 'Remote', ContractType: 'Internship', SalaryFrom: 6000000, SalaryTo: 9000000, CName: 'Topica', Logo: 'https://www.topicanative.edu.vn/static/media/logo.svg', Location: 'Hà Nội', Level: 'Fresher', RequiredExpYear: 0, JobStatus: 'Active', JCName: 'Development' },
+        { JobID: 17, JobName: 'QA Tester', JobType: 'Hybrid', ContractType: 'Parttime', SalaryFrom: 9000000, SalaryTo: 14000000, CName: 'Gameloft', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Gameloft_logo.svg/1200px-Gameloft_logo.svg.png', Location: 'Hà Nội', Level: 'Junior', RequiredExpYear: 1, JobStatus: 'Active', JCName: 'IT & Software' },
+        { JobID: 18, JobName: 'System Admin', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 12000000, SalaryTo: 18000000, CName: 'VCCorp', Logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/VCCorp_logo.svg/1200px-VCCorp_logo.svg.png', Location: 'Hà Nội', Level: 'Mid', RequiredExpYear: 3, JobStatus: 'Active', JCName: 'IT & Software' }
       ];
 
       // Apply filters to fallback data
       if (searchParams.search) {
         allFallbackJobs = allFallbackJobs.filter(job => 
           job.JobName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
-          job.CompanyName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
+          job.CName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
           job.Location.toLowerCase().includes(searchParams.search.toLowerCase())
         );
       }
@@ -531,7 +540,7 @@ const FindJobPage = () => {
       }
 
       if (filters.industry && filters.industry.length > 0) {
-        allFallbackJobs = allFallbackJobs.filter(job => filters.industry.includes(job.Industry));
+        allFallbackJobs = allFallbackJobs.filter(job => filters.industry.includes(job.JCName));
       }
 
       if (filters.jobType && filters.jobType.length > 0) {
@@ -547,17 +556,11 @@ const FindJobPage = () => {
       }
 
       // Apply salary filter if enabled
-      if (filters.salaryRange && (filters.salaryRange.min > 0 || filters.salaryRange.max < 200000)) {
+      if (filters.salaryRange && (filters.salaryRange.min > 0 || filters.salaryRange.max < 100000000)) {
         allFallbackJobs = allFallbackJobs.filter(job => {
-          // Extract salary from string like "$20,000 - $25,000"
-          const salaryMatch = job.Salary.match(/\$(\d{1,3}(?:,\d{3})*)\s*-\s*\$(\d{1,3}(?:,\d{3})*)/);
-          if (salaryMatch) {
-            const minSalary = parseInt(salaryMatch[1].replace(/,/g, ''));
-            const maxSalary = parseInt(salaryMatch[2].replace(/,/g, ''));
-            const avgSalary = (minSalary + maxSalary) / 2;
-            return avgSalary >= filters.salaryRange.min && avgSalary <= filters.salaryRange.max;
-          }
-          return true;
+          // Job phải có cả SalaryFrom và SalaryTo nằm trong khoảng filter
+          return job.SalaryFrom >= filters.salaryRange.min && 
+                 job.SalaryTo <= filters.salaryRange.max;
         });
       }
       
@@ -631,8 +634,8 @@ const FindJobPage = () => {
   };
 
   const popularSearches = [
-    'Front-end', 'Back-end', 'Development', 'PHP', 'Laravel',
-    'Bootstrap', 'Developer', 'Team Lead', 'Product Testing', 'Javascript'
+    'Frontend', 'Backend', 'Full Stack', 'React', 'Node.js',
+    'Java', 'Python', 'UI/UX', 'DevOps', 'Mobile App'
   ];
 
   const getJobTypeClass = (type) => {
@@ -785,12 +788,12 @@ const FindJobPage = () => {
         <div className="tooltip-header">
           <div className="tooltip-company-info">
             <div className="tooltip-logo">
-              <img src={job.CompanyLogo || "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"} alt={job.CompanyName} />
+              <img src={job.Logo || "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"} alt={job.CName} />
             </div>
             <div className="tooltip-title-section">
               <h4 className="tooltip-job-title">{job.JobName}</h4>
-              <p className="tooltip-company-name">{job.CompanyName}</p>
-              <p className="tooltip-salary">{job.Salary}</p>
+              <p className="tooltip-company-name">{job.CName}</p>
+              <p className="tooltip-salary">{formatVND(job.SalaryFrom)} - {formatVND(job.SalaryTo)}</p>
             </div>
             <button 
               className={`tooltip-bookmark ${bookmarkedJobs.has(job.JobID) ? 'bookmarked' : ''}`}
@@ -802,16 +805,13 @@ const FindJobPage = () => {
           </div>
           <div className="tooltip-meta">
             <div className="tooltip-location">
-              <MapPin size={16} strokeWidth={2} className="inline mr-1" />
-               {currentJobDetails.workLocation || job.location}
+              📍 {currentJobDetails.workLocation || job.location}
             </div>
             <div className="tooltip-experience">
-              <Briefcase size={16} strokeWidth={2} className="inline mr-1" />
-               {currentJobDetails.experience || '1-3 năm'}
+              💼 {currentJobDetails.experience || '1-3 năm'}
             </div>
             <div className="tooltip-deadline">
-              <Clock size={16} strokeWidth={2} className="inline mr-1" />
-               {currentJobDetails.applicationDeadline || 'Còn 30 ngày'}
+              ⏰ {currentJobDetails.applicationDeadline || 'Còn 30 ngày'}
             </div>
           </div>
         </div>
@@ -888,19 +888,17 @@ const FindJobPage = () => {
                 <span className="icon"><SearchIcon /></span>
                 <input 
                   type="text" 
-                  placeholder="Tên công việc, vị trí, từ khóa..." 
+                  placeholder="Tên công việc, vị trí (ví dụ: Frontend Developer, UI/UX Designer)" 
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
               <div className="divider"></div>
               <div className="input-group">
-                <span className="icon inline-flex items-center">
-  <MapPin size={16} strokeWidth={2} className="text-indigo-600" />
-</span>
+                <span className="icon"><MapPinIcon /></span>
                 <input 
                   type="text" 
-                  placeholder="Thành phố, tỉnh thành" 
+                  placeholder="Địa điểm (ví dụ: Hà Nội, TP.HCM, Đà Nẵng)" 
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
@@ -998,22 +996,21 @@ const FindJobPage = () => {
                 
                 <div className="card-meta">
                   <span className={getJobTypeClass(job.JobType)}>{getJobTypeLabel(job.JobType)}</span>
-                  <span className="salary">Mức lương: {job.Salary}</span>
+                  <span className="salary">Mức lương: {formatVND(job.SalaryFrom)} - {formatVND(job.SalaryTo)}</span>
                 </div>
 
                 <div className="card-footer">
                   <div className="company-info">
                     <div className="logo-box">
                        <img 
-                         src={job.CompanyLogo || "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"} 
-                         alt={job.CompanyName} 
+                         src={job.Logo || "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"} 
+                         alt={job.CName} 
                        />
                     </div>
                     <div className="info-text">
-                      <div className="company-name">{job.CompanyName}</div>
+                      <div className="company-name">{job.CName}</div>
                       <div className="location">
-                       <MapPin size={16} strokeWidth={2} className="text-indigo-600" />
-                        {job.Location}
+                        <span className="pin-icon">📍</span> {job.Location}
                       </div>
                     </div>
                   </div>
