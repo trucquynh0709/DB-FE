@@ -13,6 +13,7 @@ const Navbar = () => {
       <ul className="navbar__menu">
         <li><Link to="/">Trang chủ</Link></li>
         <li><Link to="/find-job">Tìm việc làm</Link></li>
+        <li><Link to="/employer-dashboard">Bảng điều khiển</Link></li>
         <li><Link to="/about">Hỗ trợ</Link></li>
       </ul>
       <div className="navbar__login">
@@ -26,3 +27,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
