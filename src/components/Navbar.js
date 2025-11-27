@@ -12,7 +12,7 @@ const Navbar = () => {
       </div>
       <ul className="navbar__menu">
         <li><Link to="/">Trang chủ</Link></li>
-        <li><Link to="/services">Tìm việc làm</Link></li>
+        <li><Link to="/find-job">Tìm việc làm</Link></li>
         <li><Link to="/about">Hỗ trợ</Link></li>
       </ul>
       <div className="navbar__login">

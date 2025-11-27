@@ -284,7 +284,7 @@ The role will involve translating project specifications into clean, test-driven
               </button>
             </div>
           </section>
-
+ 
           {/* Job tags */}
           {job.categories && job.categories.length > 0 && (
             <section className="job-section">

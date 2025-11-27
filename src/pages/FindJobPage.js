@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import '../styles/FindJobPage.css';
 
 // SVG Icons components
@@ -285,6 +285,7 @@ const FilterSidebar = ({
 
 const FindJobPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [jobData, setJobData] = useState([]);
@@ -591,6 +592,20 @@ const FindJobPage = () => {
       }
     };
   }, [showFilters]);
+
+  // Đọc query parameters từ URL khi component mount
+  useEffect(() => {
+    const searchFromUrl = searchParams.get('search') || '';
+    const locationFromUrl = searchParams.get('location') || '';
+    
+    if (searchFromUrl) setSearchTerm(searchFromUrl);
+    if (locationFromUrl) setLocation(locationFromUrl);
+    
+    // Nếu có params, tự động search
+    if (searchFromUrl || locationFromUrl) {
+      fetchJobs({ search: searchFromUrl, location: locationFromUrl });
+    }
+  }, []);
 
   // Load jobs khi component mount hoặc page change
   useEffect(() => {
