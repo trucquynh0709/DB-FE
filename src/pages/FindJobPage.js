@@ -478,11 +478,14 @@ const FindJobPage = () => {
       const queryParams = new URLSearchParams({
         page: currentPage,
         limit: 9, // số jobs per page
-        ...searchParams
       });
       
-      if (searchTerm) queryParams.append('search', searchTerm);
-      if (location) queryParams.append('location', location);
+      // Ưu tiên dùng params từ searchParams, nếu không có thì dùng state
+      const searchValue = searchParams.search !== undefined ? searchParams.search : searchTerm;
+      const locationValue = searchParams.location !== undefined ? searchParams.location : location;
+      
+      if (searchValue) queryParams.append('search', searchValue);
+      if (locationValue) queryParams.append('location', locationValue);
 
       const response = await fetch(`${API_BASE_URL}/jobs?${queryParams}`);
       
@@ -531,18 +534,22 @@ const FindJobPage = () => {
         allFallbackJobs = [...allFallbackJobs, ...postedJobs];
       }
 
+      // Ưu tiên dùng params từ searchParams, nếu không có thì dùng state
+      const searchValue = searchParams.search !== undefined ? searchParams.search : searchTerm;
+      const locationValue = searchParams.location !== undefined ? searchParams.location : location;
+
       // Apply filters to fallback data
-      if (searchParams.search) {
+      if (searchValue) {
         allFallbackJobs = allFallbackJobs.filter(job => 
-          job.JobName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
-          job.CName.toLowerCase().includes(searchParams.search.toLowerCase()) ||
-          job.Location.toLowerCase().includes(searchParams.search.toLowerCase())
+          (job.JobName && job.JobName.toLowerCase().includes(searchValue.toLowerCase())) ||
+          (job.CName && job.CName.toLowerCase().includes(searchValue.toLowerCase())) ||
+          (job.Location && job.Location.toLowerCase().includes(searchValue.toLowerCase()))
         );
       }
 
-      if (searchParams.location) {
+      if (locationValue) {
         allFallbackJobs = allFallbackJobs.filter(job => 
-          job.Location.toLowerCase().includes(searchParams.location.toLowerCase())
+          job.Location && job.Location.toLowerCase().includes(locationValue.toLowerCase())
         );
       }
 
@@ -936,7 +943,8 @@ const FindJobPage = () => {
                   className="tag-link"
                   onClick={() => {
                     setSearchTerm(search);
-                    fetchJobs({ search: search });
+                    setCurrentPage(1);
+                    fetchJobs({ search: search, location: location });
                   }}
                 >
                   {search}
