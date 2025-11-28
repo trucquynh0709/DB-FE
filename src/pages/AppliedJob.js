@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Bookmark, Bell, Settings, LogOut, ArrowRight, MapPin, DollarSign, CheckCircle, Layers2 } from 'lucide-react';
 import '../styles/CandidateDashboard.css';
-
+import '../styles/AppliedJob.css'
 import { Link } from 'react-router-dom';
 
 // Fallback data
@@ -64,12 +64,17 @@ const FALLBACK_DATA = {
   ]
 };
 
-export default function CandidateDashboard() {
+
+export default function AppliedJobs() {
   const [data, setData] = useState(FALLBACK_DATA);
   const [loading, setLoading] = useState(true);
   const [activeMenu, setActiveMenu] = useState('overview');
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+  useEffect(() => {
+  setActiveMenu('applied');  // Đặt menu "applied" là active khi vào trang này
+  fetchDashboardData();
+}, []);
 
   useEffect(() => {
     fetchDashboardData();
@@ -126,45 +131,45 @@ export default function CandidateDashboard() {
         </div>
 
         <nav className="db-sidebar-nav">
-          <Link 
-  to="/candidate-dashboard" 
-  className={`db-nav-item ${activeMenu === 'overview' ? 'active' : ''}`}
->
-  <Layers2 size={20} />
-  <span>Tổng quan</span>
-</Link>
-        <Link 
-  to="/candidate-dashboard/applied-jobs" 
-  className={`db-nav-item ${activeMenu === 'applied' ? 'active' : ''}`}
->
-  <Briefcase size={20} />
-  <span>Việc đã ứng tuyển</span>
-</Link>
-
-          <Link 
-  to="/candidate-dashboard/favourite-jobs" 
-  className={`db-nav-item ${activeMenu === 'favourite' ? 'active' : ''}`}
->
-  <Bookmark size={20} />
-  <span>Việc yêu thích</span>
-</Link>
-
-          <Link 
-  to="/candidate-dashboard/notifications" 
-  className={`db-nav-item ${activeMenu === 'alerts' ? 'active' : ''}`}
->
-  <Bell size={20} />
-  <span>Thông báo việc làm</span>
-</Link>
-
-          <Link 
-  to="/candidate-dashboard/setting" 
-  className={`db-nav-item ${activeMenu === 'setting' ? 'active' : ''}`}
->
-  <Settings size={20} />
-  <span>Cài đặt</span>
-</Link>
-        </nav>
+                  <Link 
+          to="/candidate-dashboard" 
+          className={`db-nav-item ${activeMenu === 'overview' ? 'active' : ''}`}
+        >
+          <Layers2 size={20} />
+          <span>Tổng quan</span>
+        </Link>
+                <Link 
+          to="/candidate-dashboard/applied-jobs" 
+          className={`db-nav-item ${activeMenu === 'applied' ? 'active' : ''}`}
+        >
+          <Briefcase size={20} />
+          <span>Việc đã ứng tuyển</span>
+        </Link>
+        
+                  <Link 
+          to="/candidate-dashboard/favourite-jobs" 
+          className={`db-nav-item ${activeMenu === 'favourite' ? 'active' : ''}`}
+        >
+          <Bookmark size={20} />
+          <span>Việc yêu thích</span>
+        </Link>
+        
+                  <Link 
+          to="/candidate-dashboard/notifications" 
+          className={`db-nav-item ${activeMenu === 'alerts' ? 'active' : ''}`}
+        >
+          <Bell size={20} />
+          <span>Thông báo việc làm</span>
+        </Link>
+        
+                  <Link 
+          to="/candidate-dashboard/setting" 
+          className={`db-nav-item ${activeMenu === 'setting' ? 'active' : ''}`}
+        >
+          <Settings size={20} />
+          <span>Cài đặt</span>
+        </Link>
+                </nav>
 
         <button className="logout-btn" onClick={handleLogout}>
           <LogOut size={18} />
@@ -174,69 +179,6 @@ export default function CandidateDashboard() {
 
       {/* Main Content */}
       <main className="dashboard-candidate">
-        {/* Welcome Section */}
-        <div className="db-welcome-section">
-          <h1 className="welcome-title">Xin chào, {data.user.name}</h1>
-          <p className="welcome-subtitle">Đây là hoạt động hàng ngày và thông báo việc làm của bạn</p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="db-stats-grid">
-          <div className="db-stat-card blue">
-            <div className="db-stat-content">
-              <div>
-                <div className="db-stat-number">{data.stats.appliedJobs}</div>
-                <div className="db-stat-label">Việc đã ứng tuyển</div>
-              </div>
-              <div className="db-stat-icon blue">
-                <Briefcase size={28} color="#0A65CC" />
-              </div>
-            </div>
-          </div>
-
-          <div className="db-stat-card yellow">
-            <div className="db-stat-content">
-              <div>
-                <div className="db-stat-number">{data.stats.favoriteJobs}</div>
-                <div className="db-stat-label">Việc yêu thích</div>
-              </div>
-              <div className="db-stat-icon blue">
-                <Bookmark size={28} color="#0A65CC" />
-              </div>
-            </div>
-          </div>
-
-          <div className="db-stat-card green">
-            <div className="db-stat-content">
-              <div>
-                <div className="db-stat-number">{data.stats.jobAlerts}</div>
-                <div className="db-stat-label">Thông báo việc làm</div>
-              </div>
-              <div className="db-stat-icon blue">
-                <Bell size={28} color="#0A65CC" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Profile Alert */}
-        <div className="profile-alert">
-          <div className="profile-alert-content">
-            <img 
-              src={data.user.avatar} 
-              alt="Avatar" 
-              className="db-profile-avatar"
-            />
-            <div>
-              <div className="profile-alert-title">Hồ sơ của bạn chưa hoàn tất.</div>
-              <div className="profile-alert-text">Hoàn thành chỉnh sửa hồ sơ và xây dựng CV tùy chỉnh của bạn</div>
-            </div>
-          </div>
-          <button className="db-edit-profile-btn" onClick={handleEditProfile}>
-            Chỉnh sửa hồ sơ
-            <ArrowRight size={18} />
-          </button>
-        </div>
 
         {/* Recently Applied Section */}
         <div className="db-recent-section">
@@ -302,6 +244,15 @@ export default function CandidateDashboard() {
               </div>
             ))}
           </div>
+          <div className="pagination">
+      <button className="page-btn">←</button>
+      <button className="page-btn active">01</button>
+      <button className="page-btn">02</button>
+      <button className="page-btn">03</button>
+      <button className="page-btn">04</button>
+      <button className="page-btn">05</button>
+      <button className="page-btn">→</button>
+    </div>
         </div>
       </main>
     </div>

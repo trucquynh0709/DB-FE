@@ -124,12 +124,12 @@ const SignInEmployer = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="employer-signin-form">
             <div className="form-group">
-              <label htmlFor="email">Company Email</label>
+              <label htmlFor="email">Email</label>
               <input
                 type="email"
                 id="email"
                 name="email"
-                placeholder="company@example.com"
+                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleInputChange}
                 className="form-input"
@@ -211,7 +211,7 @@ const SignInEmployer = () => {
           {/* Sign Up Link */}
           <div className="signup-prompt">
             Don't have an employer account? 
-            <a href="/employer/register"> Create one now</a>
+            <a href="/register-employer"> Create one now</a>
           </div>
         </div>
       </div>

@@ -79,7 +79,7 @@ const RegisterEmployer = () => {
 
           <h1>Tạo tài khoản mới</h1>
           <p className="login-link">
-            Đã có tài khoản? <a href="/signin">Đăng nhập ngay</a>
+            Đã có tài khoản? <a href="/signin-employer">Đăng nhập ngay</a>
           </p>
 
           {/* CHỌN LOẠI TÀI KHOẢN */}
