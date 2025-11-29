@@ -15,10 +15,11 @@ import EmployerDashboard from "./pages/EmployerDashboard";
 import PostJob from "./pages/PostJob";
 import MyJob from "./pages/MyJob";
 import CandidateDashboard from "./pages/CandidateDashboard";
-import EmployerDashboard from "./pages/EmployerDashboard";
 import AppliedJobs from "./pages/AppliedJob";
 import FavouriteJobs from "./pages/FavouriteJobs";
 import CandidateSetting from "./pages/CandidateSetting";
+import Notifications from "./pages/CandidateNoti";
+
 function App() {
   console.log("App rendered");
   return (
@@ -30,20 +31,22 @@ function App() {
         <Route path="/find-job" element={<FindJobPage />} />
         <Route path="/jobs/:jobId" element={<JobDetails />} />
         <Route path="/jobs/:jobId/apply" element={<ApplyJobPage />} />
-         <Route path="/employer" element={<EmployerLanding />} />
+
+        {/* Employer */}
+        <Route path="/employer" element={<EmployerLanding />} />
         <Route path="/register-employer" element={<RegisterEmployer />} />
-         <Route path="/signin-employer" element={<SignInEmployer />} />
-         <Route path="/pricing-plans" element={<PricingPlans/>} />
-         <Route path="/employer-dashboard" element={<EmployerDashboard />} />
-         <Route path="/employer/post-job" element={<PostJob />} />
-         <Route path="/employer/my-jobs" element={<MyJob />} />
-        
-          <Route path="/candidate-dashboard" element={<CandidateDashboard/>} />
-          <Route path="/candidate-dashboard/applied-jobs" element={<AppliedJobs />} />
-          <Route path="/candidate-dashboard/favourite-jobs" element={<FavouriteJobs />} />
-          <Route path="/candidate-dashboard/setting" element={<CandidateSetting />} />
-         <Route path="/employer-dashboard" element={<EmployerDashboard />} />
-        
+        <Route path="/signin-employer" element={<SignInEmployer />} />
+        <Route path="/pricing-plans" element={<PricingPlans />} />
+        <Route path="/employer-dashboard" element={<EmployerDashboard />} />
+        <Route path="/employer/post-job" element={<PostJob />} />
+        <Route path="/employer/my-jobs" element={<MyJob />} />
+
+        {/* Candidate */}
+        <Route path="/candidate-dashboard" element={<CandidateDashboard />} />        
+        <Route path="/candidate-dashboard/applied-jobs" element={<AppliedJobs />} />
+        <Route path="/candidate-dashboard/favourite-jobs" element={<FavouriteJobs />} />
+        <Route path="/candidate-dashboard/notifications" element={<Notification/>} />
+        <Route path="/candidate-dashboard/setting" element={<CandidateSetting />} />
       </Routes>
     </Layout>
   );

@@ -9,6 +9,7 @@ import {
   Link2, FileSearch, Architecture, Video, Music, DollarSign, HeartPulse
 } from 'lucide-react';
 import '../styles/HomePage.css';
+
 import CountUp from 'react-countup';
 
 const Homepage = () => {
@@ -221,18 +222,18 @@ useEffect(() => {
       </section>
 
       {/* Stats Section */}
-      <section className="stats">
+      <section className="hp-stats">
         <div className="container">
           {loading.stats ? (
             <div className="loading">Loading stats...</div>
           ) : (
-            <div className="stats-grid">
+            <div className="hp-stats-grid">
               {stats.map((stat, index) => (
-                <div key={index} className="stat-card">
-                  <div className={`stat-icon ${index === 1 ? 'active' : ''}`}>
+                <div key={index} className="hp-stat-card">
+                  <div className={`hp-stat-icon }`}>
                     {getIcon(stat.icon)}
                   </div>
-                  <div className="stat-info">
+                  <div className="hp-stat-info">
                     <h3>{stat.number}</h3>
                     <p>{stat.label}</p>
                   </div>

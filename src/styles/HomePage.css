@@ -142,18 +142,18 @@
 }
 
 /* Stats Section */
-.stats {
+.hp-stats {
   padding: 60px 0;
   background: #fff;
 }
 
-.stats-grid {
+.hp-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
 }
 
-.stat-card {
+.hp-stat-card {
   display: flex;
   align-items: center;
   gap: 20px;
@@ -162,7 +162,7 @@
   border-radius: 8px;
 }
 
-.stat-icon {
+.hp-stat-icon {
   width: 70px;
   height: 70px;
   background: #E7F0FA;
@@ -173,19 +173,19 @@
   color: #0A65CC;
 }
 
-.stat-icon.active {
+.hp-stat-icon.active {
   background: #0A65CC;
   color: #fff;
 }
 
-.stat-info h3 {
+.hp-stat-info h3 {
   font-size: 28px;
   color: #18191C;
   margin-bottom: 4px;
   font-weight: 600;
 }
 
-.stat-info p {
+.hp-stat-info p {
   color: #5E6670;
   font-size: 16px;
 }
@@ -445,7 +445,7 @@
     display: none;
   }
   
-  .stats-grid {
+  .hp-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
