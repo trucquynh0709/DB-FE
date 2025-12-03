@@ -18,7 +18,7 @@ import CandidateDashboard from "./pages/CandidateDashboard";
 import AppliedJobs from "./pages/AppliedJob";
 import FavouriteJobs from "./pages/FavouriteJobs";
 import CandidateSetting from "./pages/CandidateSetting";
-import Notifications from "./pages/CandidateNoti";
+import CandidateNoti from "./pages/CandidateNoti";
 
 function App() {
   console.log("App rendered");
@@ -45,7 +45,7 @@ function App() {
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />        
         <Route path="/candidate-dashboard/applied-jobs" element={<AppliedJobs />} />
         <Route path="/candidate-dashboard/favourite-jobs" element={<FavouriteJobs />} />
-        <Route path="/candidate-dashboard/notifications" element={<Notification/>} />
+        <Route path="/candidate-dashboard/notifications" element={<CandidateNoti/>} />
         <Route path="/candidate-dashboard/setting" element={<CandidateSetting />} />
       </Routes>
     </Layout>

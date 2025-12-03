@@ -6,18 +6,29 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
+  LogOut,
   Trash2,
   Check,
+  Bookmark,
   X,
   Filter,
+  Settings,
   Search
 } from 'lucide-react';
+import { Link } from 'lucide-react';
 import '../styles/CandidateNoti.css';
 
-const Notifications = () => {
+const CandidateNoti = () => {
+    const [activeMenu, setActiveMenu] = useState('notifications');
   const [activeFilter, setActiveFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const handleLogout = () => {
+    console.log('Logout');
+    // Handle logout logic
+  };
+
   const [notifications, setNotifications] = useState([
+
     {
       id: 1,
       type: 'application',
@@ -168,6 +179,61 @@ const Notifications = () => {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   return (
+    <div className="candidate-dashboard-container">
+          {/* Sidebar */}
+          <aside className="candidate-dashboard-sidebar">
+            <div className="db-sidebar-header">
+              <span className="db-sidebar-title">BẢNG ĐIỀU KHIỂN ỨNG VIÊN</span>
+            </div>
+    
+            <nav className="db-sidebar-nav">
+                      <Link 
+              to="/candidate-dashboard" 
+              className={`db-nav-item ${activeMenu === 'overview' ? 'active' : ''}`}
+            >
+              <span>Tổng quan</span>
+            </Link>
+                    <Link 
+              to="/candidate-dashboard/applied-jobs" 
+              className={`db-nav-item ${activeMenu === 'applied' ? 'active' : ''}`}
+            >
+              <Briefcase size={20} />
+              <span>Việc đã ứng tuyển</span>
+            </Link>
+            
+                      <Link 
+              to="/candidate-dashboard/favourite-jobs" 
+              className={`db-nav-item ${activeMenu === 'favourite' ? 'active' : ''}`}
+            >
+              <Bookmark size={20} />
+              <span>Việc yêu thích</span>
+            </Link>
+            
+                      <Link 
+              to="/candidate-dashboard/notifications" 
+              className={`db-nav-item ${activeMenu === 'alerts' ? 'active' : ''}`}
+            >
+              <Bell size={20} />
+              <span>Thông báo việc làm</span>
+            </Link>
+            
+                      <Link 
+              to="/candidate-dashboard/setting" 
+              className={`db-nav-item ${activeMenu === 'setting' ? 'active' : ''}`}
+            >
+              <Settings size={20} />
+              <span>Cài đặt</span>
+            </Link>
+                    </nav>
+    
+            <button className="logout-btn" onClick={handleLogout}>
+              <LogOut size={18} />
+              <span>Đăng xuất</span>
+            </button>
+          </aside>
+    
+          {/* Main Content */}
+          <main className="dashboard-candidate">
     <div className="jobpilot-notifications-page">
       <div className="jobpilot-notifications-container">
         {/* Header */}
@@ -320,7 +386,10 @@ const Notifications = () => {
         )}
       </div>
     </div>
+    
+      </main>
+    </div>
   );
 };
 
-export default Notifications;
+export default CandidateNoti;

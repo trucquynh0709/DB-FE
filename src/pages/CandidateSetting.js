@@ -68,7 +68,7 @@ const FALLBACK_DATA = {
   ]
 };
 
-
+ 
 export default function CandidateSetting() {
   const [data, setData] = useState(FALLBACK_DATA);
   const [loading, setLoading] = useState(true);
