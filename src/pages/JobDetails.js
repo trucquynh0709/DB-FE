@@ -29,7 +29,25 @@ const JobDetails = () => {
         const jobData = await fetchJobById(jobId);
         console.log('Job Data:', jobData); // Debug: xem cấu trúc dữ liệu
         console.log('Company Data:', jobData.company); // Debug: xem thông tin company
-        setJob(jobData);
+        
+        // Normalize data từ backend về format frontend
+        const normalizedJob = {
+          ...jobData,
+          // Map camelCase từ backend sang PascalCase cho frontend
+          SalaryFrom: jobData.salaryFrom || jobData.SalaryFrom,
+          SalaryTo: jobData.salaryTo || jobData.SalaryTo,
+          RequiredExpYear: jobData.RequireExpYear || jobData.RequiredExpYear,
+          PostDate: jobData.postDate || jobData.PostDate,
+          ExpireDate: jobData.expireDate || jobData.ExpireDate,
+          // Company data normalization
+          company: jobData.company ? {
+            ...jobData.company,
+            CName: jobData.company.CompanyName || jobData.company.CName,
+            CNationality: jobData.company.Nationality || jobData.company.CNationality,
+          } : null
+        };
+        
+        setJob(normalizedJob);
         
       } catch (err) {
         console.error('Error loading job details:', err);
@@ -101,43 +119,63 @@ const JobDetails = () => {
 
   const isJobExpired = (expireDate) => {
     if (!expireDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const expire = new Date(expireDate);
-    const now = new Date();
-    return expire < now;
+    expire.setHours(0, 0, 0, 0);
+    return expire < today;
   };
 
   const getDaysUntilExpire = (expireDate) => {
     if (!expireDate) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const expire = new Date(expireDate);
-    const now = new Date();
-    const diffTime = expire - now;
+    expire.setHours(0, 0, 0, 0);
+    const diffTime = expire - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
   };
 
+  // Format VND - Same as MyJob
+  const formatVND = (amount) => {
+    if (!amount) return '0';
+    const millions = amount / 1000000;
+    if (millions >= 1) {
+      return `${millions.toFixed(0)} triệu`;
+    }
+    return `${(amount / 1000).toFixed(0)}k`;
+  };
+
   const formatSalary = (salaryFrom, salaryTo) => {
     if (!salaryFrom && !salaryTo) return 'Thương lượng';
-    if (!salaryTo) return `${salaryFrom.toLocaleString()} VND+`;
-    return `${salaryFrom.toLocaleString()} - ${salaryTo.toLocaleString()} VND`;
+    if (!salaryTo || salaryFrom === salaryTo) {
+      return `${formatVND(salaryFrom)} VNĐ`;
+    }
+    return `${formatVND(salaryFrom)} - ${formatVND(salaryTo)} VNĐ`;
   };
 
   const getContractTypeLabel = (type) => {
     switch (type) {
-      case 'Permanent': return 'Toàn thời gian';
-      case 'Contract': return 'Hợp đồng';
+      case 'Fulltime': return 'Toàn thời gian';
+      case 'Parttime': return 'Bán thời gian';
       case 'Internship': return 'Thực tập';
+      case 'Contract': return 'Theo hợp đồng';
       case 'Freelance': return 'Tự do';
+      case 'Permanent': return 'Toàn thời gian';
       default: return type;
     }
   };
 
   const getJobTypeLabel = (type) => {
     switch (type) {
-      case 'Full-time': return 'Toàn thời gian';
-      case 'Part-time': return 'Bán thời gian';
+      case 'Fulltime': return 'Toàn thời gian';
+      case 'Parttime': return 'Bán thời gian';
       case 'Onsite': return 'Tại văn phòng';
       case 'Remote': return 'Từ xa';
       case 'Hybrid': return 'Kết hợp';
+      case 'Full-time': return 'Toàn thời gian';
+      case 'Part-time': return 'Bán thời gian';
       default: return type;
     }
   };
@@ -194,7 +232,7 @@ const JobDetails = () => {
           </div>
           <div className="job-header-info">
             <h1 className="job-title">{job.JobName || 'Tên công việc'}</h1>
-            <p className="company-name">tại {job.company?.CName || 'Công ty'}</p>
+            <p className="company-name">tại {job.company?.CompanyName || job.company?.CName || 'Công ty'}</p>
             <div className="job-badges">
               <span className={`badge badge-${job.ContractType?.toLowerCase() || 'default'}`}>
                 {getContractTypeLabel(job.ContractType)}
@@ -300,10 +338,10 @@ const JobDetails = () => {
             <section className="job-section">
               <h2 className="section-title">Thông tin công ty</h2>
               <div className="company-info">
-                <div className="company-detail">
-                  <strong>Tên công ty:</strong>
-                  <div className="company-detail-value">{job.company.CName || job.company.CompanyName || 'Chưa cập nhật'}</div>
-                </div>
+              <div className="company-detail">
+                <strong>Tên công ty:</strong>
+                <div className="company-detail-value">{job.company.CompanyName || job.company.CName || 'Chưa cập nhật'}</div>
+              </div>
                 {job.company.Industry && (
                   <div className="company-detail">
                     <strong>Ngành nghề:</strong>
@@ -377,7 +415,7 @@ const JobDetails = () => {
       </div>
               <div className="info-content">
                 <div className="info-label">Hình thức làm việc</div>
-                <div className="info-value">{getJobTypeLabel(job.JobType) || 'Chưa xác định'}</div>
+                <div className="info-value">{getJobTypeLabel(job.JobType) || getContractTypeLabel(job.ContractType) || 'Chưa xác định'}</div>
               </div>
             </div>
           </div>
@@ -392,7 +430,7 @@ const JobDetails = () => {
         </div>
                 <div className="overview-content">
                   <div className="overview-label">NGÀY ĐĂNG:</div>
-                  <div className="overview-value">{formatDate(job.PostDate)}</div>
+                  <div className="overview-value">{formatDate(job.PostDate || job.postDate)}</div>
                 </div>
               </div>
               <div className="overview-item">
@@ -402,9 +440,9 @@ const JobDetails = () => {
                 <div className="overview-content">
                   <div className="overview-label">HẠN NỘP:</div>
                   <div className="overview-value">
-                    {formatDate(job.ExpireDate)}
+                    {formatDate(job.ExpireDate || job.expireDate)}
                     {(() => {
-                      const daysLeft = getDaysUntilExpire(job.ExpireDate);
+                      const daysLeft = getDaysUntilExpire(job.ExpireDate || job.expireDate);
                       if (daysLeft !== null) {
                         if (daysLeft < 0) {
                           return <span className="expired-text"> (Đã hết hạn)</span>;
@@ -436,7 +474,7 @@ const JobDetails = () => {
         </div>
                 <div className="overview-content">
                   <div className="overview-label">KINH NGHIỆM:</div>
-                  <div className="overview-value">{job.RequiredExpYear || 0} Năm</div>
+                  <div className="overview-value">{job.RequiredExpYear || job.RequireExpYear || 0} Năm</div>
                 </div>
               </div>
               <div className="overview-item">

@@ -1,40 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { 
+  Search, 
+  MapPin, 
+  SlidersHorizontal, 
+  Bookmark, 
+  Briefcase 
+} from 'lucide-react';
 import '../styles/FindJobPage.css';
-
-// SVG Icons components
-const SearchIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <circle cx="11" cy="11" r="8"></circle>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35"></path>
-  </svg>
-);
-
-const MapPinIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"></path>
-    <circle cx="12" cy="10" r="3"></circle>
-  </svg>
-);
-
-const FilterIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
-  </svg>
-);
-
-const BookmarkIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-    <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"></path>
-  </svg>
-);
-
-const BriefcaseIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-    <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"></path>
-  </svg>
-);
 
 // Hàm ngăn scroll khi dùng wheel trên range slider - Di chuyển ra ngoài component
 const preventWheelScroll = (e) => {
@@ -365,8 +338,26 @@ const FindJobPage = () => {
       Level: job.Level || job.level || job.experienceLevel,
       RequireExpYear: job.RequireExpYear || job.requireExpYear || job.experience || 0,
       JobStatus: job.JobStatus || job.jobStatus || job.status || 'Active',
+      ExpireDate: job.ExpireDate || job.expireDate || job.expire_date || job.deadline,
       JCName: job.JCName || job.jcName || job.category || job.industry
     };
+  };
+
+  // Check if job is expired
+  const isJobExpired = (expireDate) => {
+    if (!expireDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expire = new Date(expireDate);
+    expire.setHours(0, 0, 0, 0);
+    return expire < today;
+  };
+
+  // Check if job is active (not expired and status is Open/Active)
+  const isJobActive = (job) => {
+    const notExpired = !isJobExpired(job.ExpireDate);
+    const statusOpen = job.JobStatus === 'Open' || job.JobStatus === 'Active';
+    return notExpired && statusOpen;
   };
 
   // Fetch job details from backend
@@ -557,8 +548,10 @@ const FindJobPage = () => {
       // Backend returns: { success: true, data: { jobs, pagination }, message }
       if (result.success && result.data) {
         console.log('API Job Data Sample:', result.data.jobs[0]); // Debug: xem cấu trúc data từ API
-        // Normalize job data từ API
-        const normalizedJobs = (result.data.jobs || []).map(job => normalizeJobData(job));
+        // Normalize job data từ API và lọc ra các job đang hoạt động
+        const normalizedJobs = (result.data.jobs || [])
+          .map(job => normalizeJobData(job))
+          .filter(job => isJobActive(job)); // Chỉ hiển thị job đang hoạt động
         setJobData(normalizedJobs);
         setTotalPages(result.data.pagination?.totalPages || 1);
       } else {
@@ -573,24 +566,24 @@ const FindJobPage = () => {
       // Backend response format: { JobID, JobName, CompanyName, CompanyLogo, Location, ContractType, JobType, Level, SalaryFrom, SalaryTo, ... }
       // Fallback data với format giống backend
       let allFallbackJobs = [
-        { JobID: 1, JobName: 'Technical Support', JobType: 'Parttime', ContractType: 'Parttime', SalaryFrom: 8000000, SalaryTo: 12000000, CompanyName: 'FPT Software', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/1200px-FPT_logo_2010.svg.png', Location: 'Hà Nội', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Active', JCName: 'IT & Software' },
-        { JobID: 2, JobName: 'Senior UX Designer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 20000000, SalaryTo: 30000000, CompanyName: 'Viettel Group', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Viettel_logo.svg/1200px-Viettel_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequireExpYear: 3, JobStatus: 'Active', JCName: 'Design' },
-        { JobID: 3, JobName: 'Marketing Officer', JobType: 'Hybrid', ContractType: 'Internship', SalaryFrom: 5000000, SalaryTo: 8000000, CompanyName: 'VNG Corporation', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/VNG_Corporation_logo.svg/1200px-VNG_Corporation_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Fresher', RequireExpYear: 0, JobStatus: 'Active', JCName: 'Marketing' },
-        { JobID: 4, JobName: 'Junior Designer', JobType: 'Remote', ContractType: 'Internship', SalaryFrom: 6000000, SalaryTo: 10000000, CompanyName: 'Tiki', CompanyLogo: 'https://salt.tikicdn.com/ts/upload/e4/49/6c/270be9859abd5f5ec5071da65fab0a94.png', Location: 'Hà Nội', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Active', JCName: 'Design' },
-        { JobID: 5, JobName: 'Product Designer', JobType: 'Remote', ContractType: 'Parttime', SalaryFrom: 12000000, SalaryTo: 18000000, CompanyName: 'Shopee', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/1200px-Shopee.svg.png', Location: 'Đà Nẵng', Level: 'Mid', RequireExpYear: 2, JobStatus: 'Active', JCName: 'Design' },
-        { JobID: 6, JobName: 'Project Manager', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 25000000, SalaryTo: 40000000, CompanyName: 'MB Bank', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/MBBank_logo.svg/1200px-MBBank_logo.svg.png', Location: 'Hà Nội', Level: 'Manager', RequireExpYear: 5, JobStatus: 'Active', JCName: 'Business' },
-        { JobID: 7, JobName: 'Software Engineer', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 15000000, SalaryTo: 25000000, CompanyName: 'Momo', CompanyLogo: 'https://developers.momo.vn/v3/img/logo.svg', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequireExpYear: 3, JobStatus: 'Active', JCName: 'Development' },
-        { JobID: 8, JobName: 'Visual Designer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 14000000, SalaryTo: 20000000, CompanyName: 'VinID', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Vingroup_logo.svg/1200px-Vingroup_logo.svg.png', Location: 'Hà Nội', Level: 'Mid', RequireExpYear: 2, JobStatus: 'Active', JCName: 'Design' },
-        { JobID: 9, JobName: 'UI/UX Designer', JobType: 'Remote', ContractType: 'Fulltime', SalaryFrom: 13000000, SalaryTo: 18000000, CompanyName: 'Zalo', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1200px-Icon_of_Zalo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequireExpYear: 2, JobStatus: 'Active', JCName: 'Design' },
-        { JobID: 10, JobName: 'Full Stack Dev', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 18000000, SalaryTo: 28000000, CompanyName: 'Base.vn', CompanyLogo: 'https://base.vn/static/base-logo.svg', Location: 'Hà Nội', Level: 'Senior', RequireExpYear: 4, JobStatus: 'Active', JCName: 'Development' },
-        { JobID: 11, JobName: 'Network Engineer', JobType: 'Onsite', ContractType: 'Internship', SalaryFrom: 7000000, SalaryTo: 10000000, CompanyName: 'VNPT', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/VNPT_Logo.svg/1200px-VNPT_Logo.svg.png', Location: 'Đà Nẵng', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Active', JCName: 'IT & Software' },
-        { JobID: 12, JobName: 'Frontend Dev', JobType: 'Remote', ContractType: 'Fulltime', SalaryFrom: 16000000, SalaryTo: 24000000, CompanyName: 'Got It', CompanyLogo: 'https://gotitapp.co/assets/img/logo.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequireExpYear: 3, JobStatus: 'Active', JCName: 'Development' },
-        { JobID: 13, JobName: 'Backend Dev', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 20000000, SalaryTo: 30000000, CompanyName: 'VIB Bank', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/VIB_logo.svg/1200px-VIB_logo.svg.png', Location: 'Hà Nội', Level: 'Senior', RequireExpYear: 4, JobStatus: 'Active', JCName: 'Development' },
-        { JobID: 14, JobName: 'Data Analyst', JobType: 'Remote', ContractType: 'Parttime', SalaryFrom: 10000000, SalaryTo: 15000000, CompanyName: 'Sendo', CompanyLogo: 'https://media.sendo.vn/media/logo/logo.png', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequireExpYear: 3, JobStatus: 'Active', JCName: 'IT & Software' },
-        { JobID: 15, JobName: 'DevOps Engineer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 22000000, SalaryTo: 35000000, CompanyName: 'BAEMIN', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Baemin_logo.svg/1200px-Baemin_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequireExpYear: 5, JobStatus: 'Active', JCName: 'Development' },
-        { JobID: 16, JobName: 'Mobile Developer', JobType: 'Remote', ContractType: 'Internship', SalaryFrom: 6000000, SalaryTo: 9000000, CompanyName: 'Topica', CompanyLogo: 'https://www.topicanative.edu.vn/static/media/logo.svg', Location: 'Hà Nội', Level: 'Fresher', RequireExpYear: 0, JobStatus: 'Active', JCName: 'Development' },
-        { JobID: 17, JobName: 'QA Tester', JobType: 'Hybrid', ContractType: 'Parttime', SalaryFrom: 9000000, SalaryTo: 14000000, CompanyName: 'Gameloft', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Gameloft_logo.svg/1200px-Gameloft_logo.svg.png', Location: 'Hà Nội', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Active', JCName: 'IT & Software' },
-        { JobID: 18, JobName: 'System Admin', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 12000000, SalaryTo: 18000000, CompanyName: 'VCCorp', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/VCCorp_logo.svg/1200px-VCCorp_logo.svg.png', Location: 'Hà Nội', Level: 'Mid', RequireExpYear: 3, JobStatus: 'Active', JCName: 'IT & Software' }
+        { JobID: 1, JobName: 'Technical Support', JobType: 'Parttime', ContractType: 'Parttime', SalaryFrom: 8000000, SalaryTo: 12000000, CompanyName: 'FPT Software', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/FPT_logo_2010.svg/1200px-FPT_logo_2010.svg.png', Location: 'Hà Nội', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Open', ExpireDate: '2025-12-31', JCName: 'IT & Software' },
+        { JobID: 2, JobName: 'Senior UX Designer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 20000000, SalaryTo: 30000000, CompanyName: 'Viettel Group', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Viettel_logo.svg/1200px-Viettel_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequireExpYear: 3, JobStatus: 'Active', ExpireDate: '2025-12-25', JCName: 'Design' },
+        { JobID: 3, JobName: 'Marketing Officer', JobType: 'Hybrid', ContractType: 'Internship', SalaryFrom: 5000000, SalaryTo: 8000000, CompanyName: 'VNG Corporation', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/VNG_Corporation_logo.svg/1200px-VNG_Corporation_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Fresher', RequireExpYear: 0, JobStatus: 'Active', ExpireDate: '2026-01-15', JCName: 'Marketing' },
+        { JobID: 4, JobName: 'Junior Designer', JobType: 'Remote', ContractType: 'Internship', SalaryFrom: 6000000, SalaryTo: 10000000, CompanyName: 'Tiki', CompanyLogo: 'https://salt.tikicdn.com/ts/upload/e4/49/6c/270be9859abd5f5ec5071da65fab0a94.png', Location: 'Hà Nội', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Open', ExpireDate: '2025-12-20', JCName: 'Design' },
+        { JobID: 5, JobName: 'Product Designer', JobType: 'Remote', ContractType: 'Parttime', SalaryFrom: 12000000, SalaryTo: 18000000, CompanyName: 'Shopee', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Shopee.svg/1200px-Shopee.svg.png', Location: 'Đà Nẵng', Level: 'Mid', RequireExpYear: 2, JobStatus: 'Active', ExpireDate: '2026-01-10', JCName: 'Design' },
+        { JobID: 6, JobName: 'Project Manager', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 25000000, SalaryTo: 40000000, CompanyName: 'MB Bank', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/MBBank_logo.svg/1200px-MBBank_logo.svg.png', Location: 'Hà Nội', Level: 'Manager', RequireExpYear: 5, JobStatus: 'Open', ExpireDate: '2025-12-30', JCName: 'Business' },
+        { JobID: 7, JobName: 'Software Engineer', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 15000000, SalaryTo: 25000000, CompanyName: 'Momo', CompanyLogo: 'https://developers.momo.vn/v3/img/logo.svg', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequireExpYear: 3, JobStatus: 'Active', ExpireDate: '2026-01-20', JCName: 'Development' },
+        { JobID: 8, JobName: 'Visual Designer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 14000000, SalaryTo: 20000000, CompanyName: 'VinID', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Vingroup_logo.svg/1200px-Vingroup_logo.svg.png', Location: 'Hà Nội', Level: 'Mid', RequireExpYear: 2, JobStatus: 'Open', ExpireDate: '2025-12-28', JCName: 'Design' },
+        { JobID: 9, JobName: 'UI/UX Designer', JobType: 'Remote', ContractType: 'Fulltime', SalaryFrom: 13000000, SalaryTo: 18000000, CompanyName: 'Zalo', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Icon_of_Zalo.svg/1200px-Icon_of_Zalo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequireExpYear: 2, JobStatus: 'Active', ExpireDate: '2026-01-05', JCName: 'Design' },
+        { JobID: 10, JobName: 'Full Stack Dev', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 18000000, SalaryTo: 28000000, CompanyName: 'Base.vn', CompanyLogo: 'https://base.vn/static/base-logo.svg', Location: 'Hà Nội', Level: 'Senior', RequireExpYear: 4, JobStatus: 'Open', ExpireDate: '2026-02-01', JCName: 'Development' },
+        { JobID: 11, JobName: 'Network Engineer', JobType: 'Onsite', ContractType: 'Internship', SalaryFrom: 7000000, SalaryTo: 10000000, CompanyName: 'VNPT', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/VNPT_Logo.svg/1200px-VNPT_Logo.svg.png', Location: 'Đà Nẵng', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Active', ExpireDate: '2025-12-15', JCName: 'IT & Software' },
+        { JobID: 12, JobName: 'Frontend Dev', JobType: 'Remote', ContractType: 'Fulltime', SalaryFrom: 16000000, SalaryTo: 24000000, CompanyName: 'Got It', CompanyLogo: 'https://gotitapp.co/assets/img/logo.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequireExpYear: 3, JobStatus: 'Open', ExpireDate: '2026-01-25', JCName: 'Development' },
+        { JobID: 13, JobName: 'Backend Dev', JobType: 'Hybrid', ContractType: 'Fulltime', SalaryFrom: 20000000, SalaryTo: 30000000, CompanyName: 'VIB Bank', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/VIB_logo.svg/1200px-VIB_logo.svg.png', Location: 'Hà Nội', Level: 'Senior', RequireExpYear: 4, JobStatus: 'Active', ExpireDate: '2026-01-30', JCName: 'Development' },
+        { JobID: 14, JobName: 'Data Analyst', JobType: 'Remote', ContractType: 'Parttime', SalaryFrom: 10000000, SalaryTo: 15000000, CompanyName: 'Sendo', CompanyLogo: 'https://media.sendo.vn/media/logo/logo.png', Location: 'TP. Hồ Chí Minh', Level: 'Mid', RequireExpYear: 3, JobStatus: 'Open', ExpireDate: '2025-12-22', JCName: 'IT & Software' },
+        { JobID: 15, JobName: 'DevOps Engineer', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 22000000, SalaryTo: 35000000, CompanyName: 'BAEMIN', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Baemin_logo.svg/1200px-Baemin_logo.svg.png', Location: 'TP. Hồ Chí Minh', Level: 'Senior', RequireExpYear: 5, JobStatus: 'Active', ExpireDate: '2026-02-10', JCName: 'Development' },
+        { JobID: 16, JobName: 'Mobile Developer', JobType: 'Remote', ContractType: 'Internship', SalaryFrom: 6000000, SalaryTo: 9000000, CompanyName: 'Topica', CompanyLogo: 'https://www.topicanative.edu.vn/static/media/logo.svg', Location: 'Hà Nội', Level: 'Fresher', RequireExpYear: 0, JobStatus: 'Open', ExpireDate: '2025-12-18', JCName: 'Development' },
+        { JobID: 17, JobName: 'QA Tester', JobType: 'Hybrid', ContractType: 'Parttime', SalaryFrom: 9000000, SalaryTo: 14000000, CompanyName: 'Gameloft', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Gameloft_logo.svg/1200px-Gameloft_logo.svg.png', Location: 'Hà Nội', Level: 'Junior', RequireExpYear: 1, JobStatus: 'Active', ExpireDate: '2026-01-08', JCName: 'IT & Software' },
+        { JobID: 18, JobName: 'System Admin', JobType: 'Onsite', ContractType: 'Fulltime', SalaryFrom: 12000000, SalaryTo: 18000000, CompanyName: 'VCCorp', CompanyLogo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/VCCorp_logo.svg/1200px-VCCorp_logo.svg.png', Location: 'Hà Nội', Level: 'Mid', RequireExpYear: 3, JobStatus: 'Open', ExpireDate: '2026-01-12', JCName: 'IT & Software' }
       ];
 
       // Load jobs from localStorage (posted via PostJob page)
@@ -643,6 +636,9 @@ const FindJobPage = () => {
                  job.SalaryTo <= filters.salaryRange.max;
         });
       }
+
+      // Filter out expired jobs - Chỉ hiển thị job đang hoạt động
+      allFallbackJobs = allFallbackJobs.filter(job => isJobActive(job));
       
       // Tính toán pagination cho fallback data
       const totalJobs = allFallbackJobs.length;
@@ -720,37 +716,55 @@ const FindJobPage = () => {
 
   const getJobTypeClass = (type) => {
     switch (type) {
-      case 'Onsite': return 'job-badge onsite';
-      case 'Remote': return 'job-badge remote';
-      case 'Hybrid': return 'job-badge hybrid';
-      case 'Fulltime': return 'job-badge fulltime';
-      case 'Parttime': return 'job-badge parttime';
-      case 'Contract': return 'job-badge contract';
-      case 'Internship': return 'job-badge internship';
-      // Thêm các case cho contract types từ API (nếu có format khác)
-      case 'Full-time': return 'job-badge fulltime';
-      case 'Part-time': return 'job-badge parttime';
-      case 'full_time': return 'job-badge fulltime';
-      case 'part_time': return 'job-badge parttime';
-      default: return 'job-badge';
+      case 'Onsite':
+      case 'On-site': 
+        return 'job-badge onsite';
+      case 'Remote': 
+        return 'job-badge remote';
+      case 'Hybrid': 
+        return 'job-badge hybrid';
+      case 'Fulltime':
+      case 'Full-time':
+      case 'Permanent':
+        return 'job-badge fulltime';
+      case 'Parttime':
+      case 'Part-time':
+        return 'job-badge parttime';
+      case 'Freelance':
+        return 'job-badge freelance';
+      case 'Internship':
+        return 'job-badge internship';
+      case 'Contract':
+        return 'job-badge contract';
+      default: 
+        return 'job-badge';
     }
   };
 
   const getJobTypeLabel = (type) => {
     switch (type) {
-      case 'Onsite': return 'Tại văn phòng';
-      case 'Remote': return 'Từ xa';
-      case 'Hybrid': return 'Kết hợp';
-      case 'Fulltime': return 'Toàn thời gian';
-      case 'Parttime': return 'Bán thời gian';
-      case 'Contract': return 'Hợp đồng';
-      case 'Internship': return 'Thực tập';
-      // Thêm các case cho contract types từ API (nếu có format khác)
-      case 'Full-time': return 'Toàn thời gian';
-      case 'Part-time': return 'Bán thời gian';
-      case 'full_time': return 'Toàn thời gian';
-      case 'part_time': return 'Bán thời gian';
-      default: return type;
+      case 'Onsite':
+      case 'On-site':
+        return 'Tại văn phòng';
+      case 'Remote': 
+        return 'Từ xa';
+      case 'Hybrid': 
+        return 'Kết hợp';
+      case 'Fulltime':
+      case 'Full-time':
+      case 'Permanent':
+        return 'Toàn thời gian';
+      case 'Parttime':
+      case 'Part-time':
+        return 'Bán thời gian';
+      case 'Freelance':
+        return 'Tự do';
+      case 'Internship':
+        return 'Thực tập';
+      case 'Contract':
+        return 'Hợp đồng';
+      default: 
+        return type;
     }
   };
 
@@ -890,7 +904,7 @@ const FindJobPage = () => {
               onClick={() => handleBookmark(job.JobID)}
               title="Bookmark job"
             >
-              <BookmarkIcon />
+              <Bookmark size={20} />
             </button>
           </div>
           <div className="tooltip-meta">
@@ -975,7 +989,7 @@ const FindJobPage = () => {
           <div className="search-wrapper">
             <form onSubmit={handleSearch} className="search-box-large">
               <div className="input-group">
-                <span className="icon"><SearchIcon /></span>
+                <span className="icon"><Search size={20} /></span>
                 <input 
                   type="text" 
                   placeholder="Tên công việc, vị trí (ví dụ: Frontend Developer, UI/UX Designer)" 
@@ -985,7 +999,7 @@ const FindJobPage = () => {
               </div>
               <div className="divider"></div>
               <div className="input-group">
-                <span className="icon"><MapPinIcon /></span>
+                <span className="icon"><MapPin size={20} /></span>
                 <input 
                   type="text" 
                   placeholder="Địa điểm (ví dụ: Hà Nội, TP.HCM, Đà Nẵng)" 
@@ -1000,7 +1014,7 @@ const FindJobPage = () => {
                   className="btn-filters"
                   onClick={() => setShowFilters(!showFilters)}
                 >
-                  <FilterIcon /> Bộ lọc
+                  <SlidersHorizontal size={18} /> Bộ lọc
                 </button>
                 <button type="submit" className="btn-find" disabled={loading}>
                   {loading ? 'Đang tìm...' : 'Tìm việc'}
@@ -1086,7 +1100,7 @@ const FindJobPage = () => {
                 </div>
                 
                 <div className="card-meta">
-                  <span className={getJobTypeClass(job.ContractType || job.JobType)}>{getJobTypeLabel(job.ContractType || job.JobType)}</span>
+                  <span className={getJobTypeClass(job.JobType || job.ContractType)}>{getJobTypeLabel(job.JobType || job.ContractType)}</span>
                   <span className="salary">Mức lương: {formatVND(job.SalaryFrom)} - {formatVND(job.SalaryTo)}</span>
                 </div>
 
@@ -1113,7 +1127,7 @@ const FindJobPage = () => {
                     className={`bookmark-btn ${bookmarkedJobs.has(job.JobID) ? 'bookmarked' : ''}`}
                     onClick={() => handleBookmark(job.JobID)}
                   >
-                    <BookmarkIcon />
+                    <Bookmark size={20} />
                   </button>
                 </div>
               </div>
@@ -1123,6 +1137,7 @@ const FindJobPage = () => {
           {/* Empty State */}
           {!loading && jobData.length === 0 && (
             <div className="empty-state">
+              <Briefcase size={64} color="#d1d5db" />
               <p>Không tìm thấy công việc nào. Hãy thử tìm kiếm với từ khóa khác.</p>
             </div>
           )}
