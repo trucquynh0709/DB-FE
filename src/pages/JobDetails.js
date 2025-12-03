@@ -157,12 +157,11 @@ const JobDetails = () => {
 
   const getContractTypeLabel = (type) => {
     switch (type) {
-      case 'Fulltime': return 'Toàn thời gian';
       case 'Parttime': return 'Bán thời gian';
       case 'Internship': return 'Thực tập';
       case 'Contract': return 'Theo hợp đồng';
       case 'Freelance': return 'Tự do';
-      case 'Permanent': return 'Toàn thời gian';
+      case 'Permanent': return 'Dài hạn';
       default: return type;
     }
   };

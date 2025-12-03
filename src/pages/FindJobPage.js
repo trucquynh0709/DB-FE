@@ -98,7 +98,7 @@ const FilterSidebar = ({
       <div className="filter-scroll-area">
         
         {/* --- 1. ACTIVE FILTERS SECTION --- */}
-        {(searchTerm || location || filters.industry.length > 0 || filters.jobType.length > 0 || filters.level.length > 0) && (
+        {(searchTerm || location || filters.jobType.length > 0 || filters.contractType.length > 0 || filters.level.length > 0) && (
           <div className="active-filters-section">
             <div className="active-filters-header">
               <span>Bộ lọc đang áp dụng:</span>
@@ -106,37 +106,21 @@ const FilterSidebar = ({
             <div className="active-tags">
               {searchTerm && renderActiveTag(searchTerm, () => setSearchTerm(''), 'Tìm kiếm:')}
               {location && renderActiveTag(location, () => setLocation(''), 'Vị trí:')}
-              {filters.industry.map(item => renderActiveTag(item, () => toggleFilter('industry', item)))}
               {filters.jobType.map(item => renderActiveTag(item, () => toggleFilter('jobType', item)))}
+              {filters.contractType.map(item => renderActiveTag(item, () => toggleFilter('contractType', item)))}
               {filters.level.map(item => renderActiveTag(item, () => toggleFilter('level', item)))}
             </div>
           </div>
         )}
         
         <div className="filter-section">
-          <h4>Ngành nghề</h4>
-          <div className="filter-options">
-            {['Development', 'Design', 'Marketing', 'IT & Software', 'Business', 'Finance', 'Data Science', 'Mobile', 'DevOps'].map(industry => (
-              <label key={industry} className="filter-option">
-                <input 
-                  type="checkbox" 
-                  checked={filters.industry.includes(industry)}
-                  onChange={() => toggleFilter('industry', industry)}
-                />
-                <span className="checkmark"></span>
-                <span>{industry}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        <div className="filter-section">
           <h4>Hình thức làm việc</h4>
           <div className="filter-options">
             {[
-              { value: 'Onsite', label: 'Tại văn phòng' },
+              { value: 'On-site', label: 'Tại văn phòng' },
               { value: 'Remote', label: 'Làm việc từ xa' },
-              { value: 'Hybrid', label: 'Kết hợp' }
+              { value: 'Hybrid', label: 'Kết hợp' },
+              { value: 'Full-time', label: 'Toàn thời gian' }
             ].map(type => (
               <label key={type.value} className="filter-option">
                 <input 
@@ -155,9 +139,9 @@ const FilterSidebar = ({
           <h4>Loại hợp đồng</h4>
           <div className="filter-options">
             {[
-              { value: 'Fulltime', label: 'Toàn thời gian' },
+              { value: 'Permanent', label: 'Dài hạn' },
               { value: 'Parttime', label: 'Bán thời gian' },
-              { value: 'Internship', label: 'Thực tập' },
+              { value: 'Freelance', label: 'Tự do' },
               { value: 'Contract', label: 'Theo hợp đồng' }
             ].map(type => (
               <label key={type.value} className="filter-option">
@@ -177,11 +161,10 @@ const FilterSidebar = ({
           <h4>Cấp độ kinh nghiệm</h4>
           <div className="filter-options">
             {[
-              { value: 'Fresher', label: 'Mới tốt nghiệp' },
-              { value: 'Junior', label: 'Nhân viên' },
-              { value: 'Mid', label: 'Trung cấp' },
-              { value: 'Senior', label: 'Cao cấp' },
-              { value: 'Manager', label: 'Quản lý' }
+                { value: 'Fresher', label: 'Fresher' },
+                { value: 'Junior', label: 'Junior' },
+                { value: 'Middle', label: 'Middle' },
+                { value: 'Senior', label: 'Senior' },
             ].map(level => (
               <label key={level.value} className="filter-option">
                 <input 
@@ -296,17 +279,16 @@ const FindJobPage = () => {
   // Filter states
   const [showFilters, setShowFilters] = useState(false);
   const initialFilters = {
-    industry: [],
     jobType: [],
     contractType: [],
     level: [],
     salaryRange: {
       min: 0,
       max: 100000000 // 100 triệu VNĐ
-    },
-    remoteJob: false
+    }
   };
   const [filters, setFilters] = useState(initialFilters);
+  const [appliedFilters, setAppliedFilters] = useState(initialFilters); // Filters đã được apply
   const [hasFilterChanges, setHasFilterChanges] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -491,6 +473,8 @@ const FindJobPage = () => {
       return;
     }
     
+    // Cập nhật appliedFilters với giá trị hiện tại của filters
+    setAppliedFilters(filters);
     setCurrentPage(1);
     setShowFilters(false);
     setHasFilterChanges(false);
@@ -503,10 +487,18 @@ const FindJobPage = () => {
 
   const clearFilters = useCallback(() => {
     setFilters(initialFilters);
+    setAppliedFilters(initialFilters);
+    setSearchTerm('');
+    setLocation('');
     setCurrentPage(1);
     setHasFilterChanges(false);
-    fetchJobs({ search: searchTerm, location: location });
-  }, [searchTerm, location]);
+    // Truyền initialFilters vào để fetchJobs dùng luôn, không đợi state update
+    fetchJobs({ 
+      search: '', 
+      location: '',
+      ...initialFilters 
+    });
+  }, []);
 
   // Fetch jobs from backend
   const fetchJobs = async (searchParams = {}) => {
@@ -514,29 +506,29 @@ const FindJobPage = () => {
     setError(null);
     
     try {
-      // Xây dựng query parameters
+      // Xây dựng query parameters - Lấy TẤT CẢ jobs, không phân trang ở BE
       const queryParams = new URLSearchParams({
-        page: currentPage,
-        limit: 9, // số jobs per page
+        page: 1,
+        limit: 1000, // Lấy tất cả jobs (hoặc số đủ lớn)
       });
       
       // Ưu tiên dùng params từ searchParams, nếu không có thì dùng state
       const searchValue = searchParams.search !== undefined ? searchParams.search : searchTerm;
       const locationValue = searchParams.location !== undefined ? searchParams.location : location;
-      const currentFilters = searchParams.industry !== undefined ? searchParams : filters;
+      
+      // Merge searchParams với appliedFilters, ưu tiên searchParams nếu có
+      const currentFilters = {
+        jobType: searchParams.jobType !== undefined ? searchParams.jobType : appliedFilters.jobType,
+        contractType: searchParams.contractType !== undefined ? searchParams.contractType : appliedFilters.contractType,
+        level: searchParams.level !== undefined ? searchParams.level : appliedFilters.level,
+        salaryRange: searchParams.salaryRange !== undefined ? searchParams.salaryRange : appliedFilters.salaryRange
+      };
       
       if (searchValue) queryParams.append('search', searchValue);
       if (locationValue) queryParams.append('location', locationValue);
-      if (currentFilters.jobType && currentFilters.jobType.length > 0) {
-        queryParams.append('jobType', currentFilters.jobType.join(','));
-      }
-      if (currentFilters.contractType && currentFilters.contractType.length > 0) {
-        queryParams.append('contractType', currentFilters.contractType.join(','));
-      }
-      if (currentFilters.level && currentFilters.level.length > 0) {
-        queryParams.append('level', currentFilters.level.join(','));
-      }
-
+      // Không gửi filters lên BE vì BE không handle đúng - sẽ filter hoàn toàn ở FE
+      // Backend chỉ xử lý search và location
+      
       const response = await fetch(`${API_BASE_URL}/jobs?${queryParams}`);
       
       if (!response.ok) {
@@ -548,12 +540,55 @@ const FindJobPage = () => {
       // Backend returns: { success: true, data: { jobs, pagination }, message }
       if (result.success && result.data) {
         console.log('API Job Data Sample:', result.data.jobs[0]); // Debug: xem cấu trúc data từ API
-        // Normalize job data từ API và lọc ra các job đang hoạt động
-        const normalizedJobs = (result.data.jobs || [])
-          .map(job => normalizeJobData(job))
-          .filter(job => isJobActive(job)); // Chỉ hiển thị job đang hoạt động
-        setJobData(normalizedJobs);
-        setTotalPages(result.data.pagination?.totalPages || 1);
+        // Normalize job data từ API
+        let allNormalizedJobs = (result.data.jobs || [])
+          .map(job => normalizeJobData(job));
+        
+        // Apply filters ở FE (vì BE không handle đúng)
+        // Filter jobType - OR logic (job chỉ cần match 1 trong các giá trị)
+        if (currentFilters.jobType && currentFilters.jobType.length > 0) {
+          allNormalizedJobs = allNormalizedJobs.filter(job => 
+            currentFilters.jobType.includes(job.JobType)
+          );
+        }
+        
+        // Filter contractType - OR logic
+        if (currentFilters.contractType && currentFilters.contractType.length > 0) {
+          allNormalizedJobs = allNormalizedJobs.filter(job => 
+            currentFilters.contractType.includes(job.ContractType)
+          );
+        }
+        
+        // Filter level - OR logic
+        if (currentFilters.level && currentFilters.level.length > 0) {
+          allNormalizedJobs = allNormalizedJobs.filter(job => 
+            currentFilters.level.includes(job.Level)
+          );
+        }
+        
+        // Apply salary filter
+        if (currentFilters.salaryRange && (currentFilters.salaryRange.min > 0 || currentFilters.salaryRange.max < 100000000)) {
+          allNormalizedJobs = allNormalizedJobs.filter(job => {
+            // Khoảng lương của job phải nằm trong khoảng filter (có giao nhau)
+            // Job hiển thị nếu: SalaryTo >= filter.min VÀ SalaryFrom <= filter.max
+            return job.SalaryTo >= currentFilters.salaryRange.min && 
+                   job.SalaryFrom <= currentFilters.salaryRange.max;
+          });
+        }
+        
+        // Pagination ở FE
+        const jobsPerPage = 9;
+        const totalJobs = allNormalizedJobs.length;
+        const totalPagesCalc = Math.ceil(totalJobs / jobsPerPage);
+        
+        // Ưu tiên dùng page từ searchParams, nếu không có thì dùng currentPage từ state
+        const pageToShow = searchParams.page !== undefined ? searchParams.page : currentPage;
+        const startIndex = (pageToShow - 1) * jobsPerPage;
+        const endIndex = startIndex + jobsPerPage;
+        const paginatedJobs = allNormalizedJobs.slice(startIndex, endIndex);
+        
+        setJobData(paginatedJobs);
+        setTotalPages(totalPagesCalc);
       } else {
         throw new Error('Invalid response format from server');
       }
@@ -612,28 +647,25 @@ const FindJobPage = () => {
         );
       }
 
-      if (filters.industry && filters.industry.length > 0) {
-        allFallbackJobs = allFallbackJobs.filter(job => filters.industry.includes(job.JCName));
+      if (appliedFilters.jobType && appliedFilters.jobType.length > 0) {
+        allFallbackJobs = allFallbackJobs.filter(job => appliedFilters.jobType.includes(job.JobType));
       }
 
-      if (filters.jobType && filters.jobType.length > 0) {
-        allFallbackJobs = allFallbackJobs.filter(job => filters.jobType.includes(job.JobType));
+      if (appliedFilters.contractType && appliedFilters.contractType.length > 0) {
+        allFallbackJobs = allFallbackJobs.filter(job => appliedFilters.contractType.includes(job.ContractType));
       }
 
-      if (filters.contractType && filters.contractType.length > 0) {
-        allFallbackJobs = allFallbackJobs.filter(job => filters.contractType.includes(job.ContractType));
-      }
-
-      if (filters.level && filters.level.length > 0) {
-        allFallbackJobs = allFallbackJobs.filter(job => filters.level.includes(job.Level));
+      if (appliedFilters.level && appliedFilters.level.length > 0) {
+        allFallbackJobs = allFallbackJobs.filter(job => appliedFilters.level.includes(job.Level));
       }
 
       // Apply salary filter if enabled
-      if (filters.salaryRange && (filters.salaryRange.min > 0 || filters.salaryRange.max < 100000000)) {
+      if (appliedFilters.salaryRange && (appliedFilters.salaryRange.min > 0 || appliedFilters.salaryRange.max < 100000000)) {
         allFallbackJobs = allFallbackJobs.filter(job => {
-          // Job phải có cả SalaryFrom và SalaryTo nằm trong khoảng filter
-          return job.SalaryFrom >= filters.salaryRange.min && 
-                 job.SalaryTo <= filters.salaryRange.max;
+          // Khoảng lương của job phải nằm trong khoảng filter (có giao nhau)
+          // Job hiển thị nếu: SalaryTo >= filter.min VÀ SalaryFrom <= filter.max
+          return job.SalaryTo >= appliedFilters.salaryRange.min && 
+                 job.SalaryFrom <= appliedFilters.salaryRange.max;
         });
       }
 
@@ -694,7 +726,7 @@ const FindJobPage = () => {
 
   // Load jobs khi component mount hoặc page change
   useEffect(() => {
-    fetchJobs();
+    fetchJobs({ page: currentPage });
   }, [currentPage]);
 
   // Handle search

@@ -21,7 +21,7 @@ const MyJob = () => {
     setError(null);
     try {
       // Get current employer ID (default to 5 for testing)
-      const currentEmployerId = localStorage.getItem('employerId') || '5';
+      const currentEmployerId = localStorage.getItem('employerId') || '11';
       
       console.log('Loading jobs for employer:', currentEmployerId);
       

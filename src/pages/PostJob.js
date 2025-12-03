@@ -38,19 +38,22 @@ const PostJob = () => {
   // JobType trong DB: Full-time, Part-time (theo sample data trong btl2.sql)
   const jobTypes = [
     { value: 'Full-time', label: 'Toàn thời gian' },
-    { value: 'Part-time', label: 'Bán thời gian' }
+    { value: 'On-site', label: 'Tại văn phòng' },
+    { value: 'Hybrid', label: 'Kết hợp' },
+    { value: 'Remote', label: 'Từ xa' }
   ];
   
   // Level trong DB: Junior, Middle, Senior (theo sample data trong btl2.sql)
   const jobLevels = [
-    { value: 'Junior', label: 'Nhân viên' },
-    { value: 'Middle', label: 'Nhân viên chính' },
-    { value: 'Senior', label: 'Nhân viên cao cấp' }
+                { value: 'Fresher', label: 'Fresher' },
+                { value: 'Junior', label: 'Junior' },
+                { value: 'Middle', label: 'Middle' },
+                { value: 'Senior', label: 'Senior' },
   ];
   
   // ContractType trong DB: Permanent, Contract, Freelance (theo sample data trong btl2.sql)
   const contractTypes = [
-    { value: 'Permanent', label: 'Toàn thời gian' },
+    { value: 'Permanent', label: 'Dài hạn' },
     { value: 'Contract', label: 'Hợp đồng' },
     { value: 'Freelance', label: 'Tự do' }
   ];
@@ -72,33 +75,22 @@ const PostJob = () => {
   ];
 
   // Danh mục công việc từ bảng job_category
-  const jobCategories = [
-    { value: 'IT Software', label: 'IT Software - Phát triển phần mềm' },
-    { value: 'Data Science', label: 'Data Science - Phân tích dữ liệu' },
-    { value: 'DevOps', label: 'DevOps - Vận hành hệ thống' },
-    { value: 'Cybersecurity', label: 'Cybersecurity - An ninh mạng' },
-    { value: 'UI/UX Design', label: 'UI/UX Design - Thiết kế giao diện' },
-    { value: 'Game Development', label: 'Game Development - Phát triển game' },
-    { value: 'Mobile Development', label: 'Mobile Development - Phát triển di động' }
+    const jobCategories = [
+    { value: 'Cyber Security', label: 'Cyber Security' },
+    { value: 'Data & AI', label: 'Data & AI' },
+    { value: 'Design', label: 'Design' },
+    { value: 'Hardware/IoT', label: 'Hardware/IoT' },
+    { value: 'Infrastructure', label: 'Infrastructure' },
+    { value: 'Software Dev', label: 'Software Dev' }
   ];
 
   // Kỹ năng từ bảng skill
   const availableSkills = [
     { value: 'Java', label: 'Java' },
     { value: 'Python', label: 'Python' },
-    { value: 'JavaScript', label: 'JavaScript' },
-    { value: 'React', label: 'React' },
-    { value: 'Node.js', label: 'Node.js' },
+    { value: 'ReactJS', label: 'ReactJS' },
     { value: 'SQL', label: 'SQL' },
-    { value: 'MongoDB', label: 'MongoDB' },
-    { value: 'AWS', label: 'AWS' },
-    { value: 'Docker', label: 'Docker' },
-    { value: 'Git', label: 'Git' },
-    { value: 'Spring Boot', label: 'Spring Boot' },
-    { value: 'Angular', label: 'Angular' },
-    { value: 'Machine Learning', label: 'Machine Learning' },
-    { value: 'DevOps', label: 'DevOps' },
-    { value: 'Kubernetes', label: 'Kubernetes' }
+    { value: 'Teamwork', label: 'Teamwork' }
   ];
 
   const handleInputChange = (e) => {
@@ -182,7 +174,7 @@ const PostJob = () => {
       setLoading(true);
       
       // Get employerId from localStorage (bỏ validation để test)
-      const employerId = localStorage.getItem('employerId') || '5'; // Dùng employerId = 5 (employer tồn tại trong DB)
+      const employerId = localStorage.getItem('employerId') || '11'; // Dùng employerId = 5 (employer tồn tại trong DB)
       
       // Transform data theo schema database
       // Schema: job table - JobName (max 20), JD (max 500), JobType, ContractType, Level,
