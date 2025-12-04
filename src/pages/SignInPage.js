@@ -12,6 +12,8 @@ const SignIn = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const [stats, setStats] = useState({
     liveJobs: '1,75,324',
@@ -41,10 +43,80 @@ const SignIn = () => {
     fetchStats();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Đăng nhập:', { email, password, rememberMe });
-    // Xử lý login ở đây
+    setError('');
+    setIsSubmitting(true);
+
+    console.log('🚀 Bắt đầu đăng nhập với:', { email, rememberMe });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          // role: 'candidate' // Optional - backend sẽ tự detect
+        }),
+      });
+
+      console.log('📡 Response status:', response.status);
+      
+      const data = await response.json();
+      console.log('📦 Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Đăng nhập thất bại');
+      }
+
+      if (data.success && data.data) {
+        const { token, user, role } = data.data;
+        
+        console.log('✅ Đăng nhập thành công!');
+        console.log('👤 User:', user);
+        console.log('🎭 Role:', role);
+
+        // Lưu token
+        if (rememberMe) {
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify(user));
+          console.log('💾 Đã lưu token vào localStorage');
+        } else {
+          sessionStorage.setItem('token', token);
+          sessionStorage.setItem('user', JSON.stringify(user));
+          console.log('💾 Đã lưu token vào sessionStorage');
+        }
+
+        // Điều hướng dựa trên role
+        if (role === 'candidate' || user.role === 'candidate') {
+          console.log('🔄 Chuyển đến dashboard candidate...');
+          navigate('/candidate/dashboard');
+        } else if (role === 'employer' || user.role === 'employer') {
+          console.log('🔄 Chuyển đến dashboard employer...');
+          navigate('/employer/dashboard');
+        } else {
+          console.log('🔄 Chuyển đến trang chủ...');
+          navigate('/');
+        }
+      } else {
+        throw new Error('Dữ liệu trả về không hợp lệ');
+      }
+
+    } catch (err) {
+      console.error('❌ Lỗi đăng nhập:', err);
+      console.error('❌ Chi tiết lỗi:', {
+        message: err.message,
+        stack: err.stack,
+      });
+      
+      setError(err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+      console.log('🏁 Kết thúc xử lý đăng nhập');
+    }
   };
 
   return (
@@ -63,6 +135,20 @@ const SignIn = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="signin-form">
+            {error && (
+              <div style={{
+                padding: '12px',
+                backgroundColor: '#FEE',
+                border: '1px solid #FCC',
+                borderRadius: '6px',
+                color: '#C33',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                {error}
+              </div>
+            )}
+
             <input
               type="email"
               placeholder="Email"
@@ -70,6 +156,7 @@ const SignIn = () => {
               onChange={(e) => setEmail(e.target.value)}
               className="form-input full-width"
               required
+              disabled={isSubmitting}
             />
 
             <div className="password-input-wrapper">
@@ -80,6 +167,7 @@ const SignIn = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 className="form-input"
                 required
+                disabled={isSubmitting}
               />
               <button
                 type="button"
@@ -110,8 +198,8 @@ const SignIn = () => {
               </a>
             </div>
 
-            <button type="submit" className="submit-btn">
-              Sign in
+            <button type="submit" className="submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Đang đăng nhập...' : 'Sign in'}
             </button>
           </form>
 

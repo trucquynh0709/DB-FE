@@ -23,6 +23,11 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Submit state
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
   // Stats từ API
   const [stats, setStats] = useState({
     liveJobs: '1,75,324',
@@ -61,10 +66,84 @@ const Register = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Đăng ký thành công:', formData);
-    // Xử lý đăng ký ở đây
+    setError('');
+    setSuccess('');
+
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Mật khẩu không khớp!');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự!');
+      return;
+    }
+
+    if (!formData.agreedToTerms) {
+      setError('Vui lòng đồng ý với điều khoản dịch vụ!');
+      return;
+    }
+
+    setIsSubmitting(true);
+    console.log('🚀 Bắt đầu đăng ký với:', {
+      fullName: formData.fullName,
+      username: formData.username,
+      email: formData.email
+    });
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      console.log('📡 Response status:', response.status);
+      
+      const data = await response.json();
+      console.log('📦 Response data:', data);
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Đăng ký thất bại');
+      }
+
+      if (data.success) {
+        console.log('✅ Đăng ký thành công!');
+        console.log('👤 User đã tạo:', data.data?.user);
+
+        setSuccess('Đăng ký thành công! Đang chuyển đến trang đăng nhập...');
+        
+        // Chờ 2 giây để user đọc thông báo, sau đó chuyển đến Sign In
+        setTimeout(() => {
+          console.log('🔄 Chuyển đến trang đăng nhập...');
+          navigate('/signin');
+        }, 2000);
+      } else {
+        throw new Error('Dữ liệu trả về không hợp lệ');
+      }
+
+    } catch (err) {
+      console.error('❌ Lỗi đăng ký:', err);
+      console.error('❌ Chi tiết lỗi:', {
+        message: err.message,
+        stack: err.stack,
+      });
+      
+      setError(err.message || 'Đã xảy ra lỗi. Vui lòng thử lại.');
+    } finally {
+      setIsSubmitting(false);
+      console.log('🏁 Kết thúc xử lý đăng ký');
+    }
   };
 
   return (
@@ -107,6 +186,36 @@ const Register = () => {
 
           {/* FORM ĐĂNG KÝ */}
           <form onSubmit={handleSubmit} className="form-container">
+            {/* Error Message */}
+            {error && (
+              <div style={{
+                padding: '12px',
+                backgroundColor: '#FEE',
+                border: '1px solid #FCC',
+                borderRadius: '6px',
+                color: '#C33',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                {error}
+              </div>
+            )}
+
+            {/* Success Message */}
+            {success && (
+              <div style={{
+                padding: '12px',
+                backgroundColor: '#E8F5E9',
+                border: '1px solid #A5D6A7',
+                borderRadius: '6px',
+                color: '#2E7D32',
+                fontSize: '14px',
+                marginBottom: '16px'
+              }}>
+                {success}
+              </div>
+            )}
+
             <div className="form-row">
               <input
                 type="text"
@@ -116,6 +225,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 className="form-input"
                 required
+                disabled={isSubmitting}
               />
               <input
                 type="text"
@@ -125,6 +235,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 className="form-input"
                 required
+                disabled={isSubmitting}
               />
             </div>
 
@@ -136,6 +247,7 @@ const Register = () => {
               onChange={handleInputChange}
               className="form-input full-width"
               required
+              disabled={isSubmitting}
             />
 
             <div className="password-input-wrapper">
@@ -147,6 +259,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 className="form-input full-width"
                 required
+                disabled={isSubmitting}
               />
               <button
                 type="button"
@@ -167,6 +280,7 @@ const Register = () => {
                 onChange={handleInputChange}
                 className="form-input full-width"
                 required
+                disabled={isSubmitting}
               />
               <button
                 type="button"
@@ -185,12 +299,13 @@ const Register = () => {
                 checked={formData.agreedToTerms}
                 onChange={handleInputChange}
                 required
+                disabled={isSubmitting}
               />
               <span>Tôi đã đọc và đồng ý với <a href="#terms">Điều khoản dịch vụ</a></span>
             </label>
 
-            <button type="submit" className="submit-btn">
-              Tạo tài khoản
+            <button type="submit" className="submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? 'Đang xử lý...' : 'Tạo tài khoản'}
             </button>
           </form>
 

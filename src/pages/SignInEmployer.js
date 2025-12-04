@@ -53,7 +53,7 @@ const SignInEmployer = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_BASE_URL}/employer/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,24 +61,32 @@ const SignInEmployer = () => {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          role: 'employer',
           rememberMe
         })
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        // Lưu token
-        localStorage.setItem('employerToken', data.token);
-        localStorage.setItem('employerData', JSON.stringify(data.employer));
-        
-        // Chuyển đến dashboard
+      if (!response.ok) {
+        throw new Error(data.message || 'Đăng nhập thất bại');
+      }
+
+      if (data.success && data.data) {
+        const { token, user } = data.data;
+
+        // Store token and user info
+        const storage = rememberMe ? localStorage : sessionStorage;
+        storage.setItem('token', token);
+        storage.setItem('user', JSON.stringify(user));
+
         navigate('/employer/dashboard');
       } else {
-        setError(data.message || 'Đăng nhập thất bại');
+        throw new Error('Dữ liệu trả về không hợp lệ');
       }
     } catch (err) {
-      setError('Không thể kết nối đến server. Vui lòng thử lại sau.');
+      console.error('Login error:', err);
+      setError(err.message || 'Không thể kết nối đến server. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
@@ -93,9 +101,9 @@ const SignInEmployer = () => {
           <div className="employer-logo">
             <span style={{ color: '#0A65CC', fontWeight: 'bold', fontSize: '28px' }}>IT</span>
             <span style={{ color: '#18191C', fontWeight: 'bold', fontSize: '28px' }}>viec</span>
-            <span style={{ 
-              marginLeft: '12px', 
-              fontSize: '14px', 
+            <span style={{
+              marginLeft: '12px',
+              fontSize: '14px',
               color: '#767F8C',
               fontWeight: '500'
             }}>for Employers</span>
@@ -175,8 +183,8 @@ const SignInEmployer = () => {
               </a>
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
               disabled={loading}
             >
@@ -193,16 +201,16 @@ const SignInEmployer = () => {
           <div className="social-buttons">
             <button className="social-btn google">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M19.8 10.2c0-.7-.1-1.4-.2-2H10v3.8h5.5c-.2 1.2-1 2.2-2 2.9v2.5h3.2c1.9-1.7 3-4.3 3-7.2z" fill="#4285F4"/>
-                <path d="M10 20c2.7 0 4.9-.9 6.6-2.4l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.8-5.6-4.2H1.1v2.6C2.8 17.7 6.1 20 10 20z" fill="#34A853"/>
-                <path d="M4.4 11.8c-.4-1.2-.4-2.4 0-3.6V5.6H1.1c-1.3 2.6-1.3 5.6 0 8.2l3.3-2z" fill="#FBBC04"/>
-                <path d="M10 3.9c1.5 0 2.8.5 3.9 1.5l2.9-2.9C15 .9 12.7 0 10 0 6.1 0 2.8 2.3 1.1 5.6l3.3 2.6C5.2 5.7 7.4 3.9 10 3.9z" fill="#EA4335"/>
+                <path d="M19.8 10.2c0-.7-.1-1.4-.2-2H10v3.8h5.5c-.2 1.2-1 2.2-2 2.9v2.5h3.2c1.9-1.7 3-4.3 3-7.2z" fill="#4285F4" />
+                <path d="M10 20c2.7 0 4.9-.9 6.6-2.4l-3.2-2.5c-.9.6-2 .9-3.4.9-2.6 0-4.8-1.8-5.6-4.2H1.1v2.6C2.8 17.7 6.1 20 10 20z" fill="#34A853" />
+                <path d="M4.4 11.8c-.4-1.2-.4-2.4 0-3.6V5.6H1.1c-1.3 2.6-1.3 5.6 0 8.2l3.3-2z" fill="#FBBC04" />
+                <path d="M10 3.9c1.5 0 2.8.5 3.9 1.5l2.9-2.9C15 .9 12.7 0 10 0 6.1 0 2.8 2.3 1.1 5.6l3.3 2.6C5.2 5.7 7.4 3.9 10 3.9z" fill="#EA4335" />
               </svg>
               Continue with Google
             </button>
             <button className="social-btn linkedin">
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M18.5 0h-17C.7 0 0 .7 0 1.5v17c0 .8.7 1.5 1.5 1.5h17c.8 0 1.5-.7 1.5-1.5v-17C20 .7 19.3 0 18.5 0zM6 17H3V8h3v9zM4.5 6.3c-1 0-1.8-.8-1.8-1.8s.8-1.8 1.8-1.8 1.8.8 1.8 1.8-.8 1.8-1.8 1.8zM17 17h-3v-4.4c0-1.1 0-2.5-1.5-2.5s-1.7 1.2-1.7 2.4V17H8V8h2.8v1.2h.1c.4-.8 1.4-1.5 2.8-1.5 3 0 3.6 2 3.6 4.5V17z" fill="#0A66C2"/>
+                <path d="M18.5 0h-17C.7 0 0 .7 0 1.5v17c0 .8.7 1.5 1.5 1.5h17c.8 0 1.5-.7 1.5-1.5v-17C20 .7 19.3 0 18.5 0zM6 17H3V8h3v9zM4.5 6.3c-1 0-1.8-.8-1.8-1.8s.8-1.8 1.8-1.8 1.8.8 1.8 1.8-.8 1.8-1.8 1.8zM17 17h-3v-4.4c0-1.1 0-2.5-1.5-2.5s-1.7 1.2-1.7 2.4V17H8V8h2.8v1.2h.1c.4-.8 1.4-1.5 2.8-1.5 3 0 3.6 2 3.6 4.5V17z" fill="#0A66C2" />
               </svg>
               Continue with LinkedIn
             </button>
@@ -210,7 +218,7 @@ const SignInEmployer = () => {
 
           {/* Sign Up Link */}
           <div className="signup-prompt">
-            Don't have an employer account? 
+            Don't have an employer account?
             <a href="/register-employer"> Create one now</a>
           </div>
         </div>

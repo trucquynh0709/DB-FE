@@ -1,9 +1,8 @@
 // CandidateDashboard.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Briefcase, Bookmark, Bell, Settings, LogOut, ArrowRight, MapPin, DollarSign, CheckCircle, Layers2 } from 'lucide-react';
 import '../styles/CandidateDashboard.css';
-
-import { Link } from 'react-router-dom';
 
 // Fallback data
 const FALLBACK_DATA = {
@@ -12,99 +11,172 @@ const FALLBACK_DATA = {
     avatar: 'https://ui-avatars.com/api/?name=Nguyen+Van+A&background=0A65CC&color=fff&size=128'
   },
   stats: {
-    appliedJobs: 589,
-    favoriteJobs: 238,
-    jobAlerts: 574
+    appliedJobs: 0,
+    favoriteJobs: 0,
+    jobAlerts: 0
   },
-  recentApplications: [
-    {
-      id: 1,
-      title: 'Kỹ sư Mạng',
-      type: 'Remote',
-      company: 'TechViet',
-      logo: 'https://ui-avatars.com/api/?name=TV&background=84CC16&color=fff&size=80',
-      location: 'Hà Nội',
-      salary: '$50k-80k/tháng',
-      dateApplied: 'Feb 2, 2019 19:28',
-      status: 'active'
-    },
-    {
-      id: 2,
-      title: 'Thiết kế Sản phẩm',
-      type: 'Full Time',
-      company: 'DesignHub',
-      logo: 'https://ui-avatars.com/api/?name=DH&background=EC4899&color=fff&size=80',
-      location: 'TP.HCM',
-      salary: '$50k-80k/tháng',
-      dateApplied: 'Dec 7, 2019 23:26',
-      status: 'active'
-    },
-    {
-      id: 3,
-      title: 'Thiết kế Đồ họa Junior',
-      type: 'Temporary',
-      company: 'Apple Inc',
-      logo: 'https://ui-avatars.com/api/?name=AI&background=000000&color=fff&size=80',
-      location: 'Brazil',
-      salary: '$52k-80k/tháng',
-      dateApplied: 'Feb 2, 2019 19:28',
-      status: 'active'
-    },
-    {
-      id: 4,
-      title: 'Thiết kế Trực quan',
-      type: 'Contract Base',
-      company: 'Microsoft',
-      logo: 'https://ui-avatars.com/api/?name=MS&background=0078D4&color=fff&size=80',
-      location: 'Wisconsin',
-      salary: '$50k-80k/tháng',
-      dateApplied: 'Dec 7, 2019 23:26',
-      status: 'active'
-    }
-  ]
+  recentApplications: []
 };
 
 export default function CandidateDashboard() {
+  const navigate = useNavigate();
+  
   const [data, setData] = useState(FALLBACK_DATA);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [activeMenu, setActiveMenu] = useState('overview');
 
   const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  // useEffect(() => {
+  //   // Kiểm tra xem user đã đăng nhập chưa
+  //   const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  //   const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+
+  //   if (!token || !userStr) {
+  //     console.log('⚠️ Chưa đăng nhập, chuyển về trang đăng nhập');
+  //     navigate('/signin');
+  //     return;
+  //   }
+
+  //   fetchDashboardData();
+  // }, []);
 
   const fetchDashboardData = async () => {
     setLoading(true);
+    setError('');
+    
+    console.log('🚀 Bắt đầu fetch dashboard data...');
+
     try {
-      const response = await fetch(`${API_BASE_URL}/candidate/dashboard`);
+      // Lấy token và user info
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
       
-      if (!response.ok) throw new Error('Failed to fetch dashboard data');
+      if (!token) {
+        throw new Error('Không tìm thấy token');
+      }
+
+      const user = JSON.parse(userStr);
+      const candidateId = user.candidateId || user.id;
+
+      console.log('👤 User info:', { candidateId, email: user.email });
+
+      // Gọi API GET /api/candidate/dashboard
+      // Backend sẽ lấy candidateId từ token hoặc query params
+      const response = await fetch(`${API_BASE_URL}/candidate/dashboard?candidateId=${candidateId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('📡 Response status:', response.status);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Token hết hạn. Vui lòng đăng nhập lại.');
+        }
+        throw new Error('Không thể tải dữ liệu dashboard');
+      }
       
       const apiData = await response.json();
-      setData(apiData);
+      console.log('📦 Dashboard data:', apiData);
+
+      if (apiData.success && apiData.data) {
+        // Map data từ API với fallback cho từng field
+        const mappedData = {
+          user: {
+            name: apiData.data.user?.fullName || user.fullName || 'Người dùng',
+            avatar: apiData.data.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || 'User')}&background=0A65CC&color=fff&size=128`
+          },
+          stats: {
+            appliedJobs: apiData.data.stats?.totalApplications || 0,
+            favoriteJobs: apiData.data.stats?.favoriteJobs || 0,
+            jobAlerts: apiData.data.stats?.notifications || 0
+          },
+          recentApplications: Array.isArray(apiData.data.recentApplications) && apiData.data.recentApplications.length > 0
+            ? apiData.data.recentApplications.map(app => ({
+                id: app.JobID || app.id || Math.random(),
+                title: app.jobTitle || app.title || 'Không có tiêu đề',
+                type: app.jobType || app.type || 'Full Time',
+                company: app.companyName || app.company || 'Công ty',
+                logo: app.companyLogo || app.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.companyName || app.company || 'C')}&background=0A65CC&color=fff&size=80`,
+                location: app.location || 'Chưa cập nhật',
+                salary: app.salary || 'Thỏa thuận',
+                dateApplied: app.appliedDate 
+                  ? new Date(app.appliedDate).toLocaleDateString('vi-VN') 
+                  : (app.dateApplied || 'N/A'),
+                status: app.status || 'active'
+              }))
+            : [] // Mảng rỗng nếu không có applications
+        };
+
+        console.log('✅ Mapped data:', mappedData);
+        setData(mappedData);
+      } else {
+        // Nếu response không có data, dùng fallback với thông tin user
+        console.log('⚠️ API không trả data, dùng fallback với user info');
+        setData({
+          user: {
+            name: user.fullName || 'Người dùng',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || 'User')}&background=0A65CC&color=fff&size=128`
+          },
+          stats: {
+            appliedJobs: 0,
+            favoriteJobs: 0,
+            jobAlerts: 0
+          },
+          recentApplications: []
+        });
+      }
+
     } catch (error) {
-      console.error('Error fetching dashboard:', error);
-      setData(FALLBACK_DATA);
+      console.error('❌ Lỗi fetch dashboard:', error);
+      setError(error.message);
+      
+      // Nếu lỗi token, chuyển về login
+      if (error.message.includes('Token') || error.message.includes('401')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
+        
+        setTimeout(() => {
+          navigate('/signin');
+        }, 2000);
+      } else {
+        // Dùng fallback data
+        setData(FALLBACK_DATA);
+      }
     } finally {
       setLoading(false);
+      console.log('🏁 Kết thúc fetch dashboard');
     }
   };
 
   const handleViewDetails = (jobId) => {
-    console.log('View details for job:', jobId);
-    // navigate(`/jobs/${jobId}`);
+    console.log('📄 Xem chi tiết job:', jobId);
+    navigate(`/jobs/${jobId}`);
   };
 
   const handleEditProfile = () => {
-    console.log('Edit profile');
-    // navigate('/profile/edit');
+    console.log('✏️ Chỉnh sửa profile');
+    navigate('/candidate-dashboard/setting');
   };
 
   const handleLogout = () => {
-    console.log('Logout');
-    // Handle logout logic
+    console.log('👋 Đăng xuất...');
+    
+    // Xóa token và user info
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    
+    // Chuyển về trang đăng nhập
+    navigate('/signin');
   };
 
   const getJobTypeClass = (type) => {
@@ -112,10 +184,29 @@ export default function CandidateDashboard() {
       'Remote': 'remote',
       'Full Time': 'fulltime',
       'Temporary': 'temporary',
-      'Contract Base': 'contract'
+      'Contract Base': 'contract',
+      'Part Time': 'parttime',
+      'Internship': 'internship'
     };
-    return typeMap[type] || '';
+    return typeMap[type] || 'fulltime';
   };
+
+  if (loading) {
+    return (
+      <div className="candidate-dashboard-container">
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px',
+          color: '#666'
+        }}>
+          Đang tải dữ liệu...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="candidate-dashboard-container">
@@ -127,43 +218,44 @@ export default function CandidateDashboard() {
 
         <nav className="db-sidebar-nav">
           <Link 
-  to="/candidate-dashboard" 
-  className={`db-nav-item ${activeMenu === 'overview' ? 'active' : ''}`}
->
-  <Layers2 size={20} />
-  <span>Tổng quan</span>
-</Link>
-        <Link 
-  to="/candidate-dashboard/applied-jobs" 
-  className={`db-nav-item ${activeMenu === 'applied' ? 'active' : ''}`}
->
-  <Briefcase size={20} />
-  <span>Việc đã ứng tuyển</span>
-</Link>
+            to="/candidate-dashboard" 
+            className={`db-nav-item ${activeMenu === 'overview' ? 'active' : ''}`}
+          >
+            <Layers2 size={20} />
+            <span>Tổng quan</span>
+          </Link>
+          
+          <Link 
+            to="/candidate-dashboard/applied-jobs" 
+            className={`db-nav-item ${activeMenu === 'applied' ? 'active' : ''}`}
+          >
+            <Briefcase size={20} />
+            <span>Việc đã ứng tuyển</span>
+          </Link>
 
           <Link 
-  to="/candidate-dashboard/favourite-jobs" 
-  className={`db-nav-item ${activeMenu === 'favourite' ? 'active' : ''}`}
->
-  <Bookmark size={20} />
-  <span>Việc yêu thích</span>
-</Link>
+            to="/candidate-dashboard/favourite-jobs" 
+            className={`db-nav-item ${activeMenu === 'favourite' ? 'active' : ''}`}
+          >
+            <Bookmark size={20} />
+            <span>Việc yêu thích</span>
+          </Link>
 
           <Link 
-  to="/candidate-dashboard/notifications" 
-  className={`db-nav-item ${activeMenu === 'alerts' ? 'active' : ''}`}
->
-  <Bell size={20} />
-  <span>Thông báo việc làm</span>
-</Link>
+            to="/candidate-dashboard/notifications" 
+            className={`db-nav-item ${activeMenu === 'alerts' ? 'active' : ''}`}
+          >
+            <Bell size={20} />
+            <span>Thông báo việc làm</span>
+          </Link>
 
           <Link 
-  to="/candidate-dashboard/setting" 
-  className={`db-nav-item ${activeMenu === 'setting' ? 'active' : ''}`}
->
-  <Settings size={20} />
-  <span>Cài đặt</span>
-</Link>
+            to="/candidate-dashboard/setting" 
+            className={`db-nav-item ${activeMenu === 'setting' ? 'active' : ''}`}
+          >
+            <Settings size={20} />
+            <span>Cài đặt</span>
+          </Link>
         </nav>
 
         <button className="logout-btn" onClick={handleLogout}>
@@ -174,6 +266,20 @@ export default function CandidateDashboard() {
 
       {/* Main Content */}
       <main className="dashboard-candidate">
+        {/* Error Alert */}
+        {error && (
+          <div style={{
+            padding: '12px 16px',
+            backgroundColor: '#FEE',
+            border: '1px solid #FCC',
+            borderRadius: '6px',
+            color: '#C33',
+            marginBottom: '20px'
+          }}>
+            {error}
+          </div>
+        )}
+
         {/* Welcome Section */}
         <div className="db-welcome-section">
           <h1 className="welcome-title">Xin chào, {data.user.name}</h1>
@@ -242,10 +348,10 @@ export default function CandidateDashboard() {
         <div className="db-recent-section">
           <div className="db-section-header">
             <h2 className="db-section-title">Đã ứng tuyển gần đây</h2>
-            <button className="db-view-all-btn">
+            <Link to="/candidate-dashboard/applied-jobs" className="db-view-all-btn">
               Xem tất cả
               <ArrowRight size={16} />
-            </button>
+            </Link>
           </div>
 
           {/* Table Header */}
@@ -258,49 +364,60 @@ export default function CandidateDashboard() {
 
           {/* Job List */}
           <div className="db-job-list">
-            {data.recentApplications.map((job) => (
-              <div key={job.id} className="db-job-card">
-                <div className="db-job-info">
-                  <img src={job.logo} alt={job.company} className="db-company-logo" />
-                  <div>
-                    <div className="db-job-header">
-                      <h3 className="db-job-title">{job.title}</h3>
-                      <span className={`db-job-type ${getJobTypeClass(job.type)}`}>
-                        {job.type}
-                      </span>
-                    </div>
-                    <div className="db-job-meta">
-                      <span className="db-meta-item">
-                        <MapPin size={14} />
-                        {job.location}
-                      </span>
-                      <span className="db-meta-item">
-                        <DollarSign size={14} />
-                        {job.salary}
-                      </span>
+            {data.recentApplications.length === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                color: '#999',
+                fontSize: '16px'
+              }}>
+                Bạn chưa ứng tuyển công việc nào
+              </div>
+            ) : (
+              data.recentApplications.map((job) => (
+                <div key={job.id} className="db-job-card">
+                  <div className="db-job-info">
+                    <img src={job.logo} alt={job.company} className="db-company-logo" />
+                    <div>
+                      <div className="db-job-header">
+                        <h3 className="db-job-title">{job.title}</h3>
+                        <span className={`db-job-type ${getJobTypeClass(job.type)}`}>
+                          {job.type}
+                        </span>
+                      </div>
+                      <div className="db-job-meta">
+                        <span className="db-meta-item">
+                          <MapPin size={14} />
+                          {job.location}
+                        </span>
+                        <span className="db-meta-item">
+                          <DollarSign size={14} />
+                          {job.salary}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="db-job-date">
-                  {job.dateApplied}
-                </div>
+                  <div className="db-job-date">
+                    {job.dateApplied}
+                  </div>
 
-                <div className="db-job-status">
-                  <CheckCircle size={16} />
-                  <span>Đang hoạt động</span>
-                </div>
+                  <div className="db-job-status">
+                    <CheckCircle size={16} />
+                    <span>Đang hoạt động</span>
+                  </div>
 
-                <div className="db-job-actions">
-                  <button 
-                    className="details-btn"
-                    onClick={() => handleViewDetails(job.id)}
-                  >
-                    Xem chi tiết
-                  </button>
+                  <div className="db-job-actions">
+                    <button 
+                      className="details-btn"
+                      onClick={() => handleViewDetails(job.id)}
+                    >
+                      Xem chi tiết
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </main>
