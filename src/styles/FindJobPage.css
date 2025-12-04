@@ -992,8 +992,8 @@
 }
 
 .job-badge.remote {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #dbeafe;
+  color: #1e40af;
 }
 
 .job-badge.hybrid {
@@ -1002,8 +1002,8 @@
 }
 
 .job-badge.fulltime {
-  background: #e0f2fe;
-  color: #20a103;
+  background: #d1fae5;
+  color: #065f46;
 }
 
 .job-badge.parttime {
@@ -1017,8 +1017,13 @@
 }
 
 .job-badge.internship {
-  background: #e0f2fe;
-  color: #0369a1;
+  background: #e0e7ff;
+  color: #4338ca;
+}
+
+.job-badge.freelance {
+  background: #fce7f3;
+  color: #be185d;
 }
 
 .salary {
