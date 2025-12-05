@@ -133,6 +133,11 @@ const SignIn = () => {
           <p className="signin-subtitle">
             Don't have account <a href="/signup">Create Account</a>
           </p>
+          <div className="info-box">
+            <span style={{ fontSize: '14px', color: '#5E6670' }}>
+              You are an employer? <a href="/signin-employer" style={{ color: '#0A65CC', fontWeight: '500', textDecoration: 'none' }}>Sign in as employer</a>
+            </span>
+          </div>
 
           <form onSubmit={handleSubmit} className="signin-form">
             {error && (
