@@ -218,13 +218,8 @@ const EmployerDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="greeting">
-              <h1>Xin chào, {employerName}</h1>
-              <p>Đây là hoạt động và ứng tuyển hàng ngày của bạn</p>
-            </div>
-
-              {/* Stats Cards */}
-              <div className="stats-cards">
+            {/* Stats Cards */}
+            <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-icon">
                 <Briefcase size={28} />

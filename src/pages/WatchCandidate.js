@@ -19,12 +19,6 @@ const WatchCandidate = () => {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(false);
   
-  // State cho bộ lọc Sidebar
-  const [filters, setFilters] = useState({
-    locationRadius: 32,
-    gender: 'Male', // Giá trị mặc định
-  });
-  
   const [selectedJob, setSelectedJob] = useState('all');
   const [employerJobs, setEmployerJobs] = useState([]);
   const [savedCandidates, setSavedCandidates] = useState(new Set());
@@ -189,65 +183,11 @@ const WatchCandidate = () => {
     });
   };
 
-  const handleRangeChange = (e) => {
-    const value = e.target.value;
-    setFilters(prev => ({ ...prev, locationRadius: value }));
-    // Update CSS variable for slider track color logic if needed, 
-    // or strictly rely on input range styling.
-    e.target.style.setProperty('--range-progress', `${value}%`);
-  };
-
   const getInitials = (f, l) => `${f?.[0]||''}${l?.[0]||''}`.toUpperCase();
 
   return (
     <EmployerLayout>
       <div className="watch-candidate-container">
-        
-        {/* ===== SIDEBAR (FILTERS) ===== */}
-        <aside className="sidebar">
-          {/* Location Filter */}
-          <div className="filter-widget">
-            <div className="filter-header">
-              <h4>Location Radius: <span className="highlight-text">{filters.locationRadius} miles</span></h4>
-              <ChevronUp size={20} color="#18191c" />
-            </div>
-            <div className="range-slider-container">
-              <input 
-                type="range" 
-                min="0" 
-                max="100" 
-                value={filters.locationRadius}
-                onChange={handleRangeChange}
-                className="range-slider"
-                style={{ '--range-progress': `${filters.locationRadius}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Gender Filter */}
-          <div className="filter-widget">
-            <div className="filter-header">
-              <h4>Gender</h4>
-              <ChevronUp size={20} color="#18191c" />
-            </div>
-            <div className="radio-group">
-              {['All', 'Male', 'Female', 'Others'].map((gender) => (
-                <label key={gender} className="custom-radio">
-                  <input 
-                    type="radio" 
-                    name="gender" 
-                    value={gender}
-                    checked={filters.gender === gender}
-                    onChange={() => setFilters({...filters, gender})}
-                  />
-                  <span className="radio-mark"></span>
-                  {gender}
-                </label>
-              ))}
-            </div>
-          </div>
-        </aside>
-
         {/* ===== MAIN CONTENT ===== */}
         <main className="content-area">
           
@@ -365,7 +305,12 @@ const WatchCandidate = () => {
 
                       <button 
                         className="btn-view-profile"
-                        onClick={() => navigate(`/candidate/${item.CandidateID}`)}
+                        onClick={() => navigate(`/candidate/${item.CandidateID}`, { 
+                          state: { 
+                            candidateData: item,
+                            jobId: selectedJob 
+                          } 
+                        })}
                       >
                         View Profile <ArrowRight size={18} />
                       </button>
