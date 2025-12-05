@@ -348,6 +348,262 @@
   color: rgba(255,255,255,0.8);
 }
 
+.category-card.active {
+  background: #0A65CC;
+  color: #fff;
+}
+
+.category-icon {
+  width: 56px;
+  height: 56px;
+  background: #fff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0A65CC;
+}
+
+.category-card.active .category-icon {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+}
+
+.category-info h3 {
+  font-size: 16px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.category-info p {
+  font-size: 14px;
+  color: #767F8C;
+}
+
+.category-card.active .category-info p {
+  color: rgba(255,255,255,0.8);
+}
+
+/* Loading Skeleton */
+.skeleton {
+  animation: skeletonLoading 1s linear infinite alternate;
+}
+
+@keyframes skeletonLoading {
+  0% {
+    background-color: hsl(200, 20%, 80%);
+  }
+  100% {
+    background-color: hsl(200, 20%, 95%);
+  }
+}
+
+.skeleton-line {
+  height: 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton-line.small {
+  height: 10px;
+}
+
+.category-card.skeleton {
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-icon.skeleton {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto;
+}
+
+.featured-job-card.skeleton {
+  height: 280px;
+}
+
+.featured-job-card.skeleton .f-job-logo {
+  width: 56px;
+  height: 56px;
+}
+
+.featured-job-card.skeleton .f-job-title {
+  height: 48px;
+  margin-bottom: 8px;
+}
+
+.featured-job-card.skeleton .f-job-company {
+  height: 14px;
+  width: 60%;
+}
+
+.company-card.skeleton {
+  height: 320px;
+}
+
+.company-logo.skeleton {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+}
+
+.company-card.skeleton h3 {
+  height: 18px;
+  margin-bottom: 12px;
+}
+
+.company-card.skeleton p {
+  height: 12px;
+  margin-bottom: 8px;
+}
+
+/* Featured Jobs Section */
+.featured-jobs {
+  padding: 80px 0;
+  background: #fff;
+}
+
+.featured-jobs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.featured-job-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 1px solid #E4E5E8;
+}
+
+.featured-job-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+  border-color: #0A65CC;
+}
+
+.f-job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.f-job-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #F8F9FA;
+  padding: 8px;
+}
+
+.job-type-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.job-type-badge.fulltime {
+  background: #E7F0FA;
+  color: #0A65CC;
+}
+
+.job-type-badge.parttime {
+  background: #FFF4E6;
+  color: #FF8C42;
+}
+
+.job-type-badge.hybrid {
+  background: #F0E7FA;
+  color: #6C5CE7;
+}
+
+.job-type-badge.onsite {
+  background: #E8F5E9;
+  color: #2E7D32;
+}
+
+.f-job-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.f-job-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #18191C;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured-job-card:hover .f-job-title {
+  color: #0A65CC;
+}
+
+.f-job-company {
+  font-size: 14px;
+  color: #767F8C;
+  margin: 0;
+  font-weight: 500;
+}
+
+.f-job-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-top: 1px solid #F1F2F4;
+  border-bottom: 1px solid #F1F2F4;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #5E6670;
+}
+
+.meta-item.salary {
+  color: #FF6B6B;
+  font-weight: 600;
+}
+
+.f-job-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.f-tag {
+  display: inline-block;
+  padding: 6px 12px;
+  background: #F8F9FA;
+  color: #5E6670;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.featured-job-card:hover .f-tag {
+  background: #E7F0FA;
+  color: #0A65CC;
+}
+
 
 .company-grid {
   display: grid;

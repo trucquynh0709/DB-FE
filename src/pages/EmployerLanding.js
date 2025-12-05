@@ -15,9 +15,12 @@ export default function EmployerLandingPage() {
     avgTime: '14 ngày'
   });
   const [loadingStats, setLoadingStats] = useState(true);
+  const [pricingPackages, setPricingPackages] = useState([]);
+  const [loadingPricing, setLoadingPricing] = useState(true);
 
   useEffect(() => {
     fetchStats();
+    fetchPricingPackages();
   }, []);
 
   const fetchStats = async () => {
@@ -52,6 +55,37 @@ export default function EmployerLandingPage() {
       console.log('⚠️ Using fallback stats');
     } finally {
       setLoadingStats(false);
+    }
+  };
+
+  const fetchPricingPackages = async () => {
+    console.log('🚀 Fetching pricing packages...');
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/pricing-packages`);
+      
+      console.log('📡 Pricing response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch pricing packages');
+      }
+      
+      const data = await response.json();
+      console.log('📦 Pricing data:', data);
+      
+      if (data.success && data.packages && data.packages.length > 0) {
+        setPricingPackages(data.packages);
+        console.log('✅ Pricing packages loaded:', data.packages);
+      } else {
+        throw new Error('No pricing packages found');
+      }
+      
+    } catch (error) {
+      console.error('❌ Error fetching pricing packages:', error);
+      // Sử dụng fallback nếu fetch thất bại
+      setPricingPackages([]);
+    } finally {
+      setLoadingPricing(false);
     }
   };
 
@@ -216,94 +250,141 @@ export default function EmployerLandingPage() {
             <p>Chọn gói phù hợp với nhu cầu tuyển dụng của bạn</p>
           </div>
 
-          <div className="pricing-grid">
-            {/* Free Plan */}
-            <div className="pricing-card">
-              <div className="pricing-header">
-                <h3>Miễn phí</h3>
-                <div className="price">0₫</div>
-                <p className="price-note">Dùng thử không giới hạn</p>
-              </div>
-              <ul className="pricing-features">
-                <li>
-                  <CheckCircle size={20} />
-                  <span>1 tin tuyển dụng đang hoạt động</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Hiển thị 30 ngày</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Trang công ty cơ bản</span>
-                </li>
-              </ul>
-              <Link to="/register-employer">
-                <button className="btn-pricing">Bắt đầu miễn phí</button>
-              </Link>
+          {loadingPricing ? (
+            <div className="pricing-loading">
+              <p>Đang tải các gói dịch vụ...</p>
             </div>
+          ) : pricingPackages.length > 0 ? (
+            <div className="pricing-grid">
+              {pricingPackages.map((pkg, index) => (
+                <div key={pkg.id || index} className={`pricing-card ${pkg.popular ? 'featured' : ''}`}>
+                  {pkg.popular && <div className="popular-badge">Phổ biến nhất</div>}
+                  <div className="pricing-header">
+                    <h3>{pkg.name}</h3>
+                    <div className="price">
+                      {pkg.price === 0 ? '0₫' : `${pkg.price.toLocaleString('vi-VN')}₫`}
+                    </div>
+                    {pkg.price > 0 && <p className="price-note">/ {pkg.duration === 'month' ? 'tháng' : 'năm'}</p>}
+                  </div>
+                  <ul className="pricing-features">
+                    {Array.isArray(pkg.features) && pkg.features.length > 0 ? (
+                      pkg.features.map((feature, idx) => (
+                        <li key={idx} className={feature.included ? 'included' : 'not-included'}>
+                          <CheckCircle size={20} />
+                          <span>{feature.text || feature}</span>
+                        </li>
+                      ))
+                    ) : (
+                      <>
+                        <li>
+                          <CheckCircle size={20} />
+                          <span>Tối đa {pkg.maxJobs} tin tuyển dụng</span>
+                        </li>
+                        <li>
+                          <CheckCircle size={20} />
+                          <span>Hiển thị {pkg.maxJobDuration} ngày</span>
+                        </li>
+                      </>
+                    )}
+                  </ul>
+                  <Link to="/register-employer">
+                    <button className={`btn-pricing ${pkg.popular ? 'primary' : ''}`}>
+                      {pkg.price === 0 ? 'Bắt đầu miễn phí' : 'Chọn gói này'}
+                    </button>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="pricing-grid">
+              {/* Free Plan */}
+              <div className="pricing-card">
+                <div className="pricing-header">
+                  <h3>Miễn phí</h3>
+                  <div className="price">0₫</div>
+                  <p className="price-note">Dùng thử không giới hạn</p>
+                </div>
+                <ul className="pricing-features">
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>1 tin tuyển dụng đang hoạt động</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Hiển thị 30 ngày</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Trang công ty cơ bản</span>
+                  </li>
+                </ul>
+                <Link to="/register-employer">
+                  <button className="btn-pricing">Bắt đầu miễn phí</button>
+                </Link>
+              </div>
 
-            {/* Standard Plan */}
-            <div className="pricing-card featured">
-              <div className="popular-badge">Phổ biến nhất</div>
-              <div className="pricing-header">
-                <h3>Standard</h3>
-                <div className="price">5,000,000₫</div>
-                <p className="price-note">/ tháng</p>
+              {/* Standard Plan */}
+              <div className="pricing-card featured">
+                <div className="popular-badge">Phổ biến nhất</div>
+                <div className="pricing-header">
+                  <h3>Standard</h3>
+                  <div className="price">5,000,000₫</div>
+                  <p className="price-note">/ tháng</p>
+                </div>
+                <ul className="pricing-features">
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>5 tin tuyển dụng đang hoạt động</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Tin được ưu tiên hiển thị</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Tìm kiếm CV không giới hạn</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Thống kê chi tiết</span>
+                  </li>
+                </ul>
+                <Link to="/register-employer">
+                  <button className="btn-pricing primary">Chọn gói này</button>
+                </Link>
               </div>
-              <ul className="pricing-features">
-                <li>
-                  <CheckCircle size={20} />
-                  <span>5 tin tuyển dụng đang hoạt động</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Tin được ưu tiên hiển thị</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Tìm kiếm CV không giới hạn</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Thống kê chi tiết</span>
-                </li>
-              </ul>
-              <Link to="/register-employer">
-                <button className="btn-pricing primary">Chọn gói này</button>
-              </Link>
-            </div>
 
-            {/* Premium Plan */}
-            <div className="pricing-card">
-              <div className="pricing-header">
-                <h3>Premium</h3>
-                <div className="price">12,000,000₫</div>
-                <p className="price-note">/ tháng</p>
+              {/* Premium Plan */}
+              <div className="pricing-card">
+                <div className="pricing-header">
+                  <h3>Premium</h3>
+                  <div className="price">12,000,000₫</div>
+                  <p className="price-note">/ tháng</p>
+                </div>
+                <ul className="pricing-features">
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Tin không giới hạn</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Vị trí nổi bật trang chủ</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Email marketing ứng viên</span>
+                  </li>
+                  <li>
+                    <CheckCircle size={20} />
+                    <span>Account Manager riêng</span>
+                  </li>
+                </ul>
+                <Link to="/register-employer">
+                  <button className="btn-pricing">Liên hệ tư vấn</button>
+                </Link>
               </div>
-              <ul className="pricing-features">
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Tin không giới hạn</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Vị trí nổi bật trang chủ</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Email marketing ứng viên</span>
-                </li>
-                <li>
-                  <CheckCircle size={20} />
-                  <span>Account Manager riêng</span>
-                </li>
-              </ul>
-              <Link to="/register-employer">
-                <button className="btn-pricing">Liên hệ tư vấn</button>
-              </Link>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
