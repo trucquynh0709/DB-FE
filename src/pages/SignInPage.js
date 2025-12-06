@@ -120,13 +120,13 @@ const SignIn = () => {
             <span style={{ color: '#18191C', fontWeight: 'bold', fontSize: '24px' }}>viec</span>
           </div>
 
-          <h1>Sign in</h1>
+          <h1>Đăng nhập</h1>
           <p className="signin-subtitle">
-            Don't have account <a href="/signup">Create Account</a>
+            Chưa có tài khoản? <a href="/signup">Tạo tài khoản</a>
           </p>
           <div className="info-box">
             <span style={{ fontSize: '14px', color: '#5E6670' }}>
-              You are an employer? <a href="/signin-employer" style={{ color: '#0A65CC', fontWeight: '500', textDecoration: 'none' }}>Sign in as employer</a>
+              Bạn là nhà tuyển dụng? <a href="/signin-employer" style={{ color: '#0A65CC', fontWeight: '500', textDecoration: 'none' }}>Đăng nhập với tư cách nhà tuyển dụng</a>
             </span>
           </div>
 
@@ -147,7 +147,7 @@ const SignIn = () => {
 
             <input
               type="email"
-              placeholder="Email"
+              placeholder="Địa chỉ email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="form-input full-width"
@@ -158,7 +158,7 @@ const SignIn = () => {
             <div className="password-input-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="form-input"
@@ -182,7 +182,7 @@ const SignIn = () => {
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <span>Remember me</span>
+                <span>Ghi nhớ đăng nhập</span>
               </label>
               <a href="/forgot-password" style={{ 
                 color: '#0A65CC', 
@@ -190,17 +190,17 @@ const SignIn = () => {
                 fontSize: '14px',
                 fontWeight: '500'
               }}>
-                Forgot password?
+                Quên mật khẩu?
               </a>
             </div>
 
             <button type="submit" className="submit-btn" disabled={isSubmitting}>
-              {isSubmitting ? 'Đang đăng nhập...' : 'Sign in'}
+              {isSubmitting ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
           </form>
 
           <div className="divider">
-            <span>or</span>
+            <span>Hoặc</span>
           </div>
 
           <div className="social-buttons">
@@ -208,7 +208,7 @@ const SignIn = () => {
               <svg width="20" height="20" viewBox="0 0 24 24" fill="#1877F2">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
-              Sign in with Facebook
+              Đăng nhập bằng Facebook
             </button>
             <button className="social-btn google">
               <svg width="20" height="20" viewBox="0 0 24 24">
@@ -217,7 +217,7 @@ const SignIn = () => {
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-              Sign in with Google
+              Đăng nhập bằng Google
             </button>
           </div>
         </div>
@@ -227,8 +227,8 @@ const SignIn = () => {
       <div className="login-right">
         <div className="login-stats-overlay">
           <h2>
-            Over {loadingStats ? '1,75,324' : stats.liveJobs} candidates<br />
-            waiting for good employees.
+            Hơn {loadingStats ? '1,75,324' : stats.liveJobs} ứng viên<br />
+            đang chờ nhà tuyển dụng tốt.
           </h2>
 
           <div className="login-stats-grid">
@@ -239,7 +239,7 @@ const SignIn = () => {
               <div className="login-stat-number">
                 {loadingStats ? '1,75,324' : stats.liveJobs}
               </div>
-              <div className="login-stat-label">Live Job</div>
+              <div className="login-stat-label">Việc làm đang mở</div>
             </div>
             
             <div className="login-stat-card">
@@ -249,7 +249,7 @@ const SignIn = () => {
               <div className="login-stat-number">
                 {loadingStats ? '97,354' : stats.companies}
               </div>
-              <div className="login-stat-label">Companies</div>
+              <div className="login-stat-label">Công ty đang tuyển</div>
             </div>
             
             <div className="login-stat-card">
@@ -259,7 +259,7 @@ const SignIn = () => {
               <div className="login-stat-number">
                 {loadingStats ? '7,532' : stats.newJobs}
               </div>
-              <div className="login-stat-label">New Jobs</div>
+              <div className="login-stat-label">Tin tuyển dụng mới</div>
             </div>
           </div>
         </div>

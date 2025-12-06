@@ -25,6 +25,7 @@ const EmployerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [employerId, setEmployerId] = useState(null);
+  const [employerName, setEmployerName] = useState('');
   const [recentJobs, setRecentJobs] = useState([]);
 
   const [stats, setStats] = useState({
@@ -35,18 +36,41 @@ const EmployerDashboard = () => {
   useEffect(() => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+    
+    console.log('🔐 Token:', !!token);
+    console.log('👤 User string:', userStr);
+    
     if (!token || !userStr) {
+      console.warn('⚠️ No token or user, redirecting to login');
       navigate('/signin-employer');
       return;
     }
-    const user = JSON.parse(userStr);
-    if (user.role !== 'employer') {
+    
+    try {
+      const user = JSON.parse(userStr);
+      console.log('📋 Parsed user:', user);
+      
+      // Lấy employerId từ nhiều nguồn có thể
+      const id = user.employerId || user.EmployerID || user.id || user.ID;
+      const name = user.fullName || user.companyName || user.name || user.username || 'Nhà tuyển dụng';
+      
+      console.log('✅ EmployerId:', id);
+      console.log('✅ EmployerName:', name);
+      
+      if (!id) {
+        console.error('❌ No employerId found in user data');
+        setError('Không tìm thấy thông tin nhà tuyển dụng');
+        setLoading(false);
+        return;
+      }
+      
+      setEmployerId(id);
+      setEmployerName(name);
+      fetchDashboardData(id);
+    } catch (error) {
+      console.error('❌ Error parsing user data:', error);
       navigate('/signin-employer');
-      return;
     }
-    const id = user.employerId || user.id;
-    setEmployerId(id);
-    fetchDashboardData(id);
   }, []);
 
   const fetchDashboardData = async (id) => {
@@ -54,17 +78,26 @@ const EmployerDashboard = () => {
       setLoading(true);
       setError(null);
 
+      console.log('🔍 Fetching dashboard data for employerId:', id);
+
       const [statsData, jobsData] = await Promise.all([
         getEmployerStats(id),
-        getEmployerJobs(id, { limit: 5 })
+        getEmployerJobs(id, { limit: 1000, status: 'all' }) // Limit rất lớn để lấy tất cả
       ]);
 
+      console.log('📊 Stats data:', statsData);
+      console.log('📦 Jobs data:', jobsData);
+
+      // Handle both response formats: direct data or { success, data }
+      const statsResult = statsData?.data || statsData;
       setStats({
-        NumberOfOpenedJob: statsData?.NumberOfOpenedJob || statsData?.openJobs || 0,
-        totalFollowers: statsData?.totalFollowers || statsData?.savedCandidates || 0
+        NumberOfOpenedJob: statsResult?.NumberOfOpenedJob || statsResult?.openJobs || 0,
+        totalFollowers: statsResult?.totalFollowers || statsResult?.savedCandidates || 0
       });
 
       const jobs = jobsData?.data?.jobs || jobsData?.jobs || [];
+      console.log('✅ Total jobs fetched:', jobs.length);
+      
       const transformedJobs = jobs.map((job) => {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -88,6 +121,8 @@ const EmployerDashboard = () => {
           SalaryTo: job.SalaryTo,
         };
       });
+      
+      console.log('✅ Transformed jobs:', transformedJobs);
       setRecentJobs(transformedJobs);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -183,13 +218,8 @@ const EmployerDashboard = () => {
           </div>
         ) : (
           <>
-            <div className="greeting">
-              <h1>Xin chào, Instagram</h1>
-              <p>Đây là hoạt động và ứng tuyển hàng ngày của bạn</p>
-            </div>
-
-              {/* Stats Cards */}
-              <div className="stats-cards">
+            {/* Stats Cards */}
+            <div className="stats-cards">
             <div className="stat-card">
               <div className="stat-icon">
                 <Briefcase size={28} />
@@ -227,8 +257,37 @@ const EmployerDashboard = () => {
                 <div className="col-actions">HÀNH ĐỘNG</div>
               </div>
 
-              {recentJobs.map((job) => (
-                <div key={job.JobID} className={`table-row ${job.JobStatus === 'Đã đóng' ? 'expired' : ''}`}>
+              {recentJobs.length === 0 ? (
+                <div style={{ 
+                  textAlign: 'center', 
+                  padding: '60px 20px', 
+                  color: '#999',
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '8px',
+                  margin: '20px 0'
+                }}>
+                  <Briefcase size={48} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
+                  <h3 style={{ marginBottom: '8px', color: '#666' }}>Chưa có tin tuyển dụng</h3>
+                  <p style={{ marginBottom: '20px' }}>Bạn chưa đăng tin tuyển dụng nào. Hãy bắt đầu đăng tin ngay!</p>
+                  <Link 
+                    to="/employer/post-job" 
+                    style={{
+                      display: 'inline-block',
+                      padding: '10px 24px',
+                      background: '#0A65CC',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    Đăng tin tuyển dụng
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  {recentJobs.map((job) => (
+                <div key={job.JobID} className={`table-row ${job.JobStatus === 'Closed' || job.JobStatus === 'Expired' ? 'expired' : ''}`}>
                   <div className="col-job">
                     <h4>{job.JobName}</h4>
                     <p className="job-meta">
@@ -236,8 +295,8 @@ const EmployerDashboard = () => {
                     </p>
                   </div>
                   <div className="col-status">
-                    <span className={`status-badge ${job.JobStatus === 'Open' ? 'active' : 'expired'}`}>
-                      {job.JobStatus === 'Open' ? (
+                    <span className={`status-badge ${job.JobStatus === 'Active' || job.JobStatus === 'Open' ? 'active' : 'expired'}`}>
+                      {job.JobStatus === 'Active' || job.JobStatus === 'Open' ? (
                         <><CheckCircle2 size={14} /> Đang hoạt động</>
                       ) : (
                         <><XCircle size={14} /> Hết hạn</>
@@ -283,6 +342,8 @@ const EmployerDashboard = () => {
                   </div>
                 </div>
               ))}
+                </>
+              )}
             </div>
           </div>
             </>

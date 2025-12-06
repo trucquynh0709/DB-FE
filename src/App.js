@@ -19,6 +19,8 @@ import AppliedJobs from "./pages/AppliedJob";
 import FavouriteJobs from "./pages/FavouriteJobs";
 import CandidateSetting from "./pages/CandidateSetting";
 import CandidateNoti from "./pages/CandidateNoti";
+import WatchCandidate from "./pages/WatchCandidate";
+import ViewCandidateProfile from "./pages/ViewCandidateProfile";
 
 function App() {
   console.log("App rendered");
@@ -40,6 +42,8 @@ function App() {
         <Route path="/employer-dashboard" element={<EmployerDashboard />} />
         <Route path="/employer/post-job" element={<PostJob />} />
         <Route path="/employer/my-jobs" element={<MyJob />} />
+        <Route path="/employer/watch-candidate" element={<WatchCandidate />} />
+        <Route path="/candidate/:candidateId" element={<ViewCandidateProfile />} />
 
         {/* Candidate */}
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />        

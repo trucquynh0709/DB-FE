@@ -173,8 +173,29 @@ const PostJob = () => {
     try {
       setLoading(true);
       
-      // Get employerId from localStorage (bỏ validation để test)
-      const employerId = localStorage.getItem('employerId') || '11'; // Dùng employerId = 5 (employer tồn tại trong DB)
+      // Get employerId from user data (same way as EmployerDashboard and MyJob)
+      const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
+      if (!userStr) {
+        throw new Error('Không tìm thấy thông tin đăng nhập. Vui lòng đăng nhập lại.');
+      }
+      
+      const user = JSON.parse(userStr);
+      console.log('👤 [PostJob] Parsed user object:', user);
+      console.log('📋 [PostJob] Available fields:', Object.keys(user));
+      console.log('🔍 [PostJob] user.employerId:', user.employerId);
+      console.log('🔍 [PostJob] user.EmployerID:', user.EmployerID);
+      console.log('🔍 [PostJob] user.id:', user.id);
+      console.log('🔍 [PostJob] user.ID:', user.ID);
+      
+      const employerId = user.employerId || user.EmployerID || user.id || user.ID;
+      
+      console.log('🔑 [PostJob] Selected employerId:', employerId);
+      console.log('🔑 [PostJob] Type:', typeof employerId);
+      
+      if (!employerId) {
+        console.error('❌ [PostJob] No employerId found in user:', user);
+        throw new Error('Không tìm thấy thông tin nhà tuyển dụng. Vui lòng đăng nhập lại.');
+      }
       
       // Transform data theo schema database
       // Schema: job table - JobName (max 20), JD (max 500), JobType, ContractType, Level,
@@ -201,8 +222,9 @@ const PostJob = () => {
         skills: formData.skills // Kỹ năng đã chọn
       };
       
-      console.log('=== POSTING JOB ===');
-      console.log('Job data:', JSON.stringify(jobData, null, 2));
+      console.log('=== [PostJob] POSTING JOB ===');
+      console.log('📦 Job data to send:', JSON.stringify(jobData, null, 2));
+      console.log('🔑 EmployerID in job data:', jobData.EmployerID);
       
       // Call backend API
       const response = await postJob(jobData);
@@ -254,6 +276,8 @@ const PostJob = () => {
       categories: [],
       skills: []
     });
+    // Redirect to My Jobs page to see the newly posted job
+    navigate('/employer/my-jobs');
   };
 
   const handleViewJobs = () => {

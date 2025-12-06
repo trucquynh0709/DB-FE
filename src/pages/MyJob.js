@@ -20,10 +20,35 @@ const MyJob = () => {
     setLoading(true);
     setError(null);
     try {
-      // Get current employer ID (default to 5 for testing)
-      const currentEmployerId = localStorage.getItem('employerId') || '11';
+      // Get user info from storage (same way as EmployerDashboard)
+      const userStr = localStorage.getItem('user') || sessionStorage.getItem('user');
       
-      console.log('Loading jobs for employer:', currentEmployerId);
+      console.log('🔍 User string from storage:', userStr);
+      
+      if (!userStr) {
+        throw new Error('Không tìm thấy thông tin đăng nhập. Vui lòng đăng nhập lại.');
+      }
+      
+      const user = JSON.parse(userStr);
+      console.log('👤 Parsed user object:', user);
+      console.log('📋 Available fields:', Object.keys(user));
+      console.log('🔍 user.employerId:', user.employerId);
+      console.log('🔍 user.EmployerID:', user.EmployerID);
+      console.log('🔍 user.id:', user.id);
+      console.log('🔍 user.ID:', user.ID);
+      
+      // Get employerId from multiple possible sources (prioritize employerId from backend)
+      const currentEmployerId = user.employerId || user.EmployerID || user.id || user.ID;
+      
+      console.log('🔑 Found employerId:', currentEmployerId);
+      console.log('🔑 Type of employerId:', typeof currentEmployerId);
+      
+      if (!currentEmployerId) {
+        console.error('❌ No employerId found in user:', user);
+        throw new Error('Không tìm thấy thông tin nhà tuyển dụng. Vui lòng đăng nhập lại.');
+      }
+      
+      console.log('📡 Loading jobs for employer:', currentEmployerId);
       
       // Call API to get jobs from backend
       const response = await getEmployerJobs(currentEmployerId, {

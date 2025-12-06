@@ -37,6 +37,9 @@ export const getEmployerStats = async (employerId) => {
 // SalaryFrom, SalaryTo, RequiredExpYear, Location, PostDate, ExpireDate, JobStatus, NumberOfApplicant
 export const getEmployerJobs = async (employerId, params = {}) => {
   try {
+    console.log('📡 Calling getEmployerJobs API for employerId:', employerId);
+    console.log('📋 Params:', params);
+    
     const queryParams = new URLSearchParams({
       page: params.page || 1,
       limit: params.limit || 10,
@@ -44,7 +47,10 @@ export const getEmployerJobs = async (employerId, params = {}) => {
       ...params
     });
 
-    const response = await fetch(`${API_BASE_URL}/employer/${employerId}/jobs?${queryParams}`, {
+    const url = `${API_BASE_URL}/employer/${employerId}/jobs?${queryParams}`;
+    console.log('🌐 API URL:', url);
+    
+    const response = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -52,14 +58,19 @@ export const getEmployerJobs = async (employerId, params = {}) => {
       },
     });
 
+    console.log('📡 Response status:', response.status);
+
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ API Error:', errorText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log('✅ Jobs API response:', data);
     return data;
   } catch (error) {
-    console.error('Error fetching employer jobs:', error);
+    console.error('❌ Error fetching employer jobs:', error);
     throw error;
   }
 };

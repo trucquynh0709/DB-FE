@@ -80,7 +80,7 @@ export default function AppliedJobs() {
         // Map applications từ API
         const mappedApplications = (data.data.applications || []).map(app => ({
           id: app.JobID || app.id,
-          title: app.jobTitle || app.JobName || 'Không có tiêu đề',
+          title: app.title || app.JobName || 'Không có tiêu đề',
           type: app.jobType || app.JobType || 'Full Time',
           company: app.companyName || app.company || 'Công ty',
           logo: app.companyLogo || app.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.companyName || 'C')}&background=0A65CC&color=fff&size=80`,
@@ -298,7 +298,6 @@ export default function AppliedJobs() {
           {/* Table Header */}
           <div className="candidate-table-header">
             <div>Công việc</div>
-            <div>Ngày ứng tuyển</div>
             <div>Trạng thái</div>
             <div>Hành động</div>
           </div>
@@ -349,10 +348,6 @@ export default function AppliedJobs() {
                         </span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="db-job-date">
-                    {job.dateApplied}
                   </div>
 
                   <div className={`db-job-status status-${getStatusClass(job.status)}`}>

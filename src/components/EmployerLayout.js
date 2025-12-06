@@ -71,8 +71,8 @@ const EmployerLayout = ({ children }) => {
               <span>Tin đã đăng</span>
             </Link>
             <Link 
-              to="/employer/candidates" 
-              className={`menu-item ${isActive('/employer/candidates')}`}
+              to="/employer/watch-candidate" 
+              className={`menu-item ${isActive('/employer/watch-candidate')}`}
             >
               <Bookmark size={18} />
               <span>Ứng viên</span>
@@ -116,31 +116,6 @@ const EmployerLayout = ({ children }) => {
 
       {/* Main Content Area */}
       <div className="employer-main">
-        {/* Top Header */}
-        <header className="employer-header">
-          <div className="header-container">
-            <button 
-              className="mobile-menu-btn"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <Menu size={24} />
-            </button>
-            
-            <div className="header-search">
-            </div>
-
-            <div className="header-actions">
-              <button className="notification-btn">
-                <Bell size={20} />
-                <span className="notification-badge">1</span>
-              </button>
-              <div className="user-profile">
-                <User size={20} />
-              </div>
-            </div>
-          </div>
-        </header>
-
         {/* Page Content */}
         <main className="employer-content">
           {children}

@@ -1,7 +1,7 @@
 // CandidateDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Briefcase, Bookmark, Bell, Settings, LogOut, ArrowRight, MapPin, DollarSign, CheckCircle, Layers2 } from 'lucide-react';
+import { Briefcase, Bookmark, Bell, Settings, LogOut, ArrowRight, MapPin, DollarSign, Layers2 } from 'lucide-react';
 import '../styles/CandidateDashboard.css';
 
 // Fallback data
@@ -88,30 +88,28 @@ export default function CandidateDashboard() {
         // Map data từ API với fallback cho từng field
         const mappedData = {
           user: {
-            name: apiData.data.user?.fullName || user.fullName || 'Người dùng',
-            avatar: apiData.data.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.fullName || 'User')}&background=0A65CC&color=fff&size=128`
+            name: apiData.data.user?.name || user.fullName || 'Người dùng',
+            avatar: apiData.data.user?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(apiData.data.user?.name || user.fullName || 'User')}&background=0A65CC&color=fff&size=128`
           },
           stats: {
-            appliedJobs: apiData.data.stats?.totalApplications || 0,
+            appliedJobs: apiData.data.stats?.appliedJobs || 0,
             favoriteJobs: apiData.data.stats?.favoriteJobs || 0,
-            jobAlerts: apiData.data.stats?.notifications || 0
+            jobAlerts: apiData.data.stats?.jobAlerts || 0
           },
           recentApplications: Array.isArray(apiData.data.recentApplications) && apiData.data.recentApplications.length > 0
             ? apiData.data.recentApplications.map(app => ({
-                id: app.JobID || app.id || Math.random(),
-                title: app.jobTitle || app.title || 'Không có tiêu đề',
-                type: app.jobType || app.type || 'Full Time',
-                company: app.companyName || app.company || 'Công ty',
-                logo: app.companyLogo || app.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.companyName || app.company || 'C')}&background=0A65CC&color=fff&size=80`,
+                id: app.jobId || app.id || Math.random(),
+                title: app.title || 'Không có tiêu đề',
+                type: app.type || 'Full Time',
+                company: app.company || 'Công ty',
+                logo: app.logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(app.company || 'C')}&background=0A65CC&color=fff&size=80`,
                 location: app.location || 'Chưa cập nhật',
                 salary: app.salary || 'Thỏa thuận',
-                dateApplied: app.appliedDate 
-                  ? new Date(app.appliedDate).toLocaleDateString('vi-VN') 
-                  : (app.dateApplied || 'N/A'),
+                dateApplied: app.appliedAt || 'N/A',
                 status: app.status || 'active'
               }))
             : [] // Mảng rỗng nếu không có applications
-        };
+        };  
 
         console.log('✅ Mapped data:', mappedData);
         setData(mappedData);
@@ -189,6 +187,21 @@ export default function CandidateDashboard() {
       'Internship': 'internship'
     };
     return typeMap[type] || 'fulltime';
+  };
+
+  const getStatusDisplay = (status) => {
+    const statusMap = {
+      'đang duyệt': { text: 'Đang duyệt', class: 'pending'},
+      'pending': { text: 'Đang xét duyệt', class: 'pending'},
+      'submitted': { text: 'Đang xét duyệt', class: 'pending' },
+      'active': { text: 'Đang hoạt động', class: 'active', icon: '✓' },
+      'approved': { text: 'Đã duyệt', class: 'active', icon: '✓' },
+      'từ chối': { text: 'Từ chối', class: 'rejected', icon: '✕' },
+      'rejected': { text: 'Từ chối', class: 'rejected', icon: '✕' },
+      'cancelled': { text: 'Đã hủy', class: 'cancelled', icon: '⊘' },
+      'expired': { text: 'Hết hạn', class: 'expired', icon: '!' }
+    };
+    return statusMap[status?.toLowerCase()] || { text: 'Đang xét duyệt', class: 'pending', icon: '⏳' };
   };
 
   if (loading) {
@@ -357,7 +370,6 @@ export default function CandidateDashboard() {
           {/* Table Header */}
           <div className="candidate-table-header">
             <div>Công việc</div>
-            <div>Ngày ứng tuyển</div>
             <div>Trạng thái</div>
             <div>Hành động</div>
           </div>
@@ -398,13 +410,9 @@ export default function CandidateDashboard() {
                     </div>
                   </div>
 
-                  <div className="db-job-date">
-                    {job.dateApplied}
-                  </div>
-
-                  <div className="db-job-status">
-                    <CheckCircle size={16} />
-                    <span>Đang hoạt động</span>
+                  <div className={`db-job-status status-${getStatusDisplay(job.status).class}`}>
+                    <span className="status-icon">{getStatusDisplay(job.status).icon}</span>
+                    <span>{getStatusDisplay(job.status).text}</span>
                   </div>
 
                   <div className="db-job-actions">

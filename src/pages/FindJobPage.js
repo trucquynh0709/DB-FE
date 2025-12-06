@@ -344,15 +344,10 @@ const FindJobPage = () => {
 
   // Fetch job details from backend
   const fetchJobDetails = async (jobId) => {
-    if (jobDetails[jobId]) {
-      return jobDetails[jobId];
-    }
-
-    if (loadingJobIds.has(jobId)) {
-      return;
-    }
-
+    // Luôn fetch lại để có dữ liệu mới nhất
+    setTooltipLoading(true);
     setLoadingJobIds(prev => new Set([...prev, jobId]));
+    
     try {
       const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`);
       
@@ -362,19 +357,59 @@ const FindJobPage = () => {
       
       const result = await response.json();
       
-      // Normalize job details từ API
-      const normalizedData = {
-        id: result.data?.JobID || result.data?.id || jobId,
-        description: result.data?.JobDescription || result.data?.description || result.data?.Description,
-        requirements: result.data?.JobRequirements || result.data?.requirements || result.data?.Requirements || [],
-        benefits: result.data?.JobBenefits || result.data?.benefits || result.data?.Benefits || [],
-        applicationDeadline: result.data?.ApplicationDeadline || result.data?.deadline || result.data?.Deadline,
-        experience: result.data?.RequireExpYear ? `${result.data.RequireExpYear} năm` : (result.data?.experience || result.data?.Experience),
-        workLocation: result.data?.Location || result.data?.location || result.data?.WorkLocation,
-        skills: result.data?.Skills || result.data?.skills || result.data?.RequiredSkills || [],
-        contactEmail: result.data?.ContactEmail || result.data?.email || result.data?.Email,
-        applicationLink: result.data?.ApplicationLink || `/jobs/apply/${jobId}`
+      console.log('📦 Job details API response:', result);
+      
+      // Normalize job details từ API với nhiều fallback options
+      const data = result.data || result;
+      
+      // Parse JD (Job Description) - có thể là chuỗi hoặc object
+      let description = data.JD || data.JobDescription || data.description || data.Description || '';
+      
+      // Parse requirements - có thể là array hoặc string ngăn cách bởi dấu chấm câu
+      let requirements = [];
+      if (Array.isArray(data.requirements || data.Requirements)) {
+        requirements = data.requirements || data.Requirements;
+      } else if (typeof (data.requirements || data.Requirements) === 'string') {
+        requirements = (data.requirements || data.Requirements).split(/[.;]+/).filter(r => r.trim());
+      }
+      
+      // Parse skills - có thể từ nhiều nguồn
+      let skills = [];
+      if (Array.isArray(data.skills || data.Skills)) {
+        skills = data.skills || data.Skills;
+      } else if (Array.isArray(data.RequiredSkills)) {
+        skills = data.RequiredSkills;
+      }
+      
+      // Tính số ngày còn lại
+      const calculateDaysLeft = (expireDate) => {
+        if (!expireDate) return 'Chưa cập nhật';
+        const today = new Date();
+        const expire = new Date(expireDate);
+        const diffTime = expire - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) return 'Đã hết hạn';
+        if (diffDays === 0) return 'Hết hạn hôm nay';
+        if (diffDays === 1) return 'Còn 1 ngày';
+        return `Còn ${diffDays} ngày`;
       };
+      
+      const normalizedData = {
+        id: data.JobID || data.id || jobId,
+        description: description,
+        requirements: requirements,
+        benefits: data.benefits || data.Benefits || [],
+        applicationDeadline: calculateDaysLeft(data.ExpireDate || data.expireDate),
+        experience: data.RequiredExpYear || data.RequireExpYear ? `${data.RequiredExpYear || data.RequireExpYear} năm` : (data.experience || data.Experience || '0 năm'),
+        workLocation: data.Location || data.location || data.WorkLocation || 'Chưa cập nhật',
+        skills: skills,
+        contactEmail: data.ContactEmail || data.email || data.Email,
+        applicationLink: data.ApplicationLink || `/jobs/${jobId}/apply`,
+        expireDate: data.ExpireDate || data.expireDate
+      };
+      
+      console.log('✅ Normalized job details:', normalizedData);
       
       setJobDetails(prev => ({
         ...prev,
@@ -384,29 +419,20 @@ const FindJobPage = () => {
       return normalizedData;
       
     } catch (err) {
-      console.error('Error fetching job details:', err);
+      console.error('❌ Error fetching job details:', err);
       
+      // Fallback data nếu API lỗi
       const fallbackData = {
         id: jobId,
-        description: "Quản lý, đào tạo và theo dõi hiệu quả bán hàng của nhóm và của từng NVKD; Hoàn thành chỉ tiêu bán hàng do BLD giao; Tham gia trực tiếp tìm kiếm, tư vấn, hỗ trợ, chăm sóc khách hàng về thông tin các sản phẩm Bất động sản cao cấp của Công ty; Xây dựng hình ảnh và tác phong chuyên nghiệp cho Phòng Kinh doanh; Tuyển dung, đào tạo, hướng dẫn, hỗ trợ đội ngũ kinh doanh để đảm bảo đầy đủ nguồn nhân lực cho kế hoạch bán hàng.",
-        requirements: [
-          "Tốt nghiệp Đại học các chuyên ngành liên quan",
-          "Ít nhất 3 năm kinh nghiệm trong lĩnh vực bán hàng/kinh doanh",
-          "Kỹ năng giao tiếp và thuyết phục tốt",
-          "Khả năng làm việc nhóm và quản lý đội nhóm"
-        ],
-        benefits: [
-          "Lương cơ bản + thưởng theo KPI",
-          "Bảo hiểm xã hội đầy đủ",
-          "Môi trường làm việc chuyên nghiệp",
-          "Cơ hội thăng tiến và phát triển"
-        ],
-        applicationDeadline: "Còn 29 ngày",
-        experience: "3 năm",
-        workLocation: "Hồ Chí Minh & 2 nơi khác",
-        skills: ["JavaScript", "React", "Node.js", "Database Management"],
-        contactEmail: "hr@company.com",
-        applicationLink: "/jobs/apply/" + jobId
+        description: "Thông tin chi tiết đang được cập nhật...",
+        requirements: [],
+        benefits: [],
+        applicationDeadline: "Đang cập nhật",
+        experience: "Đang cập nhật",
+        workLocation: "Đang cập nhật",
+        skills: [],
+        contactEmail: "",
+        applicationLink: `/jobs/${jobId}/apply`
       };
       
       setJobDetails(prev => ({
@@ -416,6 +442,7 @@ const FindJobPage = () => {
       
       return fallbackData;
     } finally {
+      setTooltipLoading(false);
       setLoadingJobIds(prev => {
         const newSet = new Set(prev);
         newSet.delete(jobId);
@@ -908,6 +935,7 @@ const FindJobPage = () => {
     if (!job) return null;
 
     const currentJobDetails = jobDetails[job.JobID] || {};
+    const isLoading = loadingJobIds.has(job.JobID);
 
     return (
       <div 
@@ -924,12 +952,19 @@ const FindJobPage = () => {
         <div className="tooltip-header">
           <div className="tooltip-company-info">
             <div className="tooltip-logo">
-              <img src={job.CompanyLogo || "https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"} alt={job.CompanyName} />
+              <img 
+                src={job.CompanyLogo || getDefaultLogoUrl(job.CompanyName)} 
+                alt={job.CompanyName}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = getDefaultLogoUrl(job.CompanyName);
+                }}
+              />
             </div>
             <div className="tooltip-title-section">
               <h4 className="tooltip-job-title">{job.JobName}</h4>
               <p className="tooltip-company-name">{job.CompanyName}</p>
-              <p className="tooltip-salary">{formatVND(job.SalaryFrom)} - {formatVND(job.SalaryTo)}</p>
+              <p className="tooltip-salary">{formatVND(job.SalaryFrom)} - {formatVND(job.SalaryTo)} VNĐ</p>
             </div>
             <button 
               className={`tooltip-bookmark ${bookmarkedJobs.has(job.JobID) ? 'bookmarked' : ''}`}
@@ -941,19 +976,19 @@ const FindJobPage = () => {
           </div>
           <div className="tooltip-meta">
             <div className="tooltip-location">
-              📍 {currentJobDetails.workLocation || job.location}
+              📍 {currentJobDetails.workLocation || job.Location || 'Đang tải...'}
             </div>
             <div className="tooltip-experience">
-              💼 {currentJobDetails.experience || '1-3 năm'}
+              💼 {currentJobDetails.experience || (job.RequiredExpYear ? `${job.RequiredExpYear} năm` : 'Đang tải...')}
             </div>
             <div className="tooltip-deadline">
-              ⏰ {currentJobDetails.applicationDeadline || 'Còn 30 ngày'}
+              ⏰ {currentJobDetails.applicationDeadline || 'Đang tải...'}
             </div>
           </div>
         </div>
         
         <div className="tooltip-content">
-          {loadingJobIds.has(job.JobID) ? (
+          {isLoading ? (
             <div className="tooltip-loading">
               <div className="tooltip-spinner"></div>
               <span>Đang tải chi tiết...</span>
@@ -965,13 +1000,30 @@ const FindJobPage = () => {
                 <p>{currentJobDetails.description || 'Đang cập nhật mô tả công việc...'}</p>
               </div>
               
-              {currentJobDetails.skills && (
+              {currentJobDetails.requirements && currentJobDetails.requirements.length > 0 && (
+                <div className="tooltip-section">
+                  <h5>Yêu cầu công việc</h5>
+                  <ul className="tooltip-requirements">
+                    {currentJobDetails.requirements.slice(0, 3).map((req, index) => (
+                      <li key={index}>{req}</li>
+                    ))}
+                    {currentJobDetails.requirements.length > 3 && (
+                      <li className="more-items">... và {currentJobDetails.requirements.length - 3} yêu cầu khác</li>
+                    )}
+                  </ul>
+                </div>
+              )}
+              
+              {currentJobDetails.skills && currentJobDetails.skills.length > 0 && (
                 <div className="tooltip-section">
                   <h5>Kỹ năng yêu cầu</h5>
                   <div className="tooltip-skills">
-                    {currentJobDetails.skills.map((skill, index) => (
+                    {currentJobDetails.skills.slice(0, 5).map((skill, index) => (
                       <span key={index} className="skill-tag">{skill}</span>
                     ))}
+                    {currentJobDetails.skills.length > 5 && (
+                      <span className="skill-tag more">+{currentJobDetails.skills.length - 5}</span>
+                    )}
                   </div>
                 </div>
               )}
@@ -981,7 +1033,7 @@ const FindJobPage = () => {
                   className="tooltip-btn apply-btn"
                   onClick={() => handleApplyJob(job.JobID)}
                 >
-                  Ứng tuyển
+                  Ứng tuyển ngay
                 </button>
                 <button 
                   className="tooltip-btn detail-btn"

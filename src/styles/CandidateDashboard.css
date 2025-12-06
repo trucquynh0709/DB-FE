@@ -479,11 +479,7 @@ body {
 }
 
 .candidate-table-header > div:nth-child(3) {
-  flex: 0.8;
-}
-
-.candidate-table-header > div:nth-child(4) {
-  flex: 0.8;
+  flex: 1;
 }
 
 /* Job List */
@@ -559,24 +555,45 @@ body {
   color: #767F8C;
 }
 
-.db-job-date {
-  font-size: 14px;
-  color: #5E6670;
-  flex: 1;
-}
-
 .db-job-status {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #10B981;
   font-weight: 500;
-  flex: 0.8;
+  flex: 1;
+}
+
+/* Status Colors */
+.db-job-status.status-active {
+  color: #10B981;
+}
+
+.db-job-status.status-pending {
+  color: #F59E0B;
+}
+
+.db-job-status.status-rejected {
+  color: #EF4444;
+}
+
+.db-job-status.status-cancelled {
+  color: #64748B;
+}
+
+.db-job-status.status-expired {
+  color: #94A3B8;
+}
+
+.status-icon {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .db-job-actions {
-  flex: 0.8;
+  flex: 1;
 }
 
 .details-btn {
