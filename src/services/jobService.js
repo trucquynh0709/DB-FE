@@ -63,11 +63,8 @@ export const fetchJobById = async (jobId) => {
     const result = await response.json();
     
     // Backend returns: { success: true, data: {...jobDetails}, message }
-    if (result.success && result.data) {
-      return result.data;
-    }
-    
-    throw new Error('Invalid response format from server');
+    // Return the whole result object so consumers can check success flag
+    return result;
   } catch (error) {
     console.error('Error fetching job details:', error);
     throw error;

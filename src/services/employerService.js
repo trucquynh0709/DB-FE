@@ -202,6 +202,39 @@ export const updateJobStatus = async (jobId, status) => {
   }
 };
 
+// Update a job
+export const updateJob = async (jobId, jobData) => {
+  try {
+    console.log('=== UPDATE JOB DEBUG ===');
+    console.log('API URL:', `${API_BASE_URL}/jobs/${jobId}`);
+    console.log('Job data:', JSON.stringify(jobData, null, 2));
+    
+    const response = await fetch(`${API_BASE_URL}/jobs/${jobId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${getAuthToken()}`
+      },
+      body: JSON.stringify(jobData),
+    });
+
+    console.log('Response status:', response.status);
+    
+    const data = await response.json();
+    console.log('Response data:', data);
+
+    if (!response.ok) {
+      const errorMessage = data.message || data.error || `HTTP error! status: ${response.status}`;
+      throw new Error(errorMessage);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('❌ Error updating job:', error);
+    throw error;
+  }
+};
+
 // Delete a job
 export const deleteJob = async (jobId) => {
   try {
@@ -432,6 +465,7 @@ export default {
   getJobApplications,
   getSavedCandidates,
   postJob,
+  updateJob,
   updateJobStatus,
   deleteJob,
   getEmployerProfile,

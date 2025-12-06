@@ -102,8 +102,7 @@ const MyJob = () => {
   };
 
   const handleEditJob = (jobId) => {
-    // TODO: Implement edit functionality
-    alert('Tính năng chỉnh sửa đang được phát triển!');
+    navigate(`/employer/update-job/${jobId}`);
   };
 
   // Format VND
