@@ -43,6 +43,7 @@ function App() {
         <Route path="/employer/post-job" element={<PostJob />} />
         <Route path="/employer/my-jobs" element={<MyJob />} />
         <Route path="/employer/watch-candidate" element={<WatchCandidate />} />
+        <Route path="/employer/watch-candidate/:jobId" element={<WatchCandidate />} />
         <Route path="/candidate/:candidateId" element={<ViewCandidateProfile />} />
 
         {/* Candidate */}

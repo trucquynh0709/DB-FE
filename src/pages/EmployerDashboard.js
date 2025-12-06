@@ -311,7 +311,7 @@ const EmployerDashboard = () => {
                   <div className="col-actions">
                     <button 
                       className="view-applications-btn"
-                      onClick={() => {}}
+                      onClick={() => navigate(`/employer/watch-candidate/${job.JobID}`)}
                     >
                       Xem ứng tuyển
                     </button>

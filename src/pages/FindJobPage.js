@@ -915,6 +915,12 @@ const FindJobPage = () => {
 
   // Handle apply job
   const handleApplyJob = (jobId) => {
+    // Kiểm tra đăng nhập trước khi ứng tuyển
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      navigate('/signin');
+      return;
+    }
     // Chuyển đến trang apply
     navigate(`/jobs/${jobId}/apply`);
   };

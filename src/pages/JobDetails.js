@@ -262,6 +262,12 @@ const JobDetails = () => {
             className={`btn-apply ${(isJobExpired(job.ExpireDate) || job.JobStatus === 'Close') ? 'disabled' : ''}`}
             onClick={() => {
               if (!isJobExpired(job.ExpireDate) && job.JobStatus !== 'Close') {
+                // Kiểm tra đăng nhập trước khi ứng tuyển
+                const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                if (!token) {
+                  navigate('/signin');
+                  return;
+                }
                 navigate(`/jobs/${jobId}/apply`);
               }
             }}

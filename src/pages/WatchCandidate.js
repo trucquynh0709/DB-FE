@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
   MapPin, 
   Clock, // Thay Briefcase bằng Clock cho giống mẫu '3 Years experience' hoặc dùng Briefcase tùy ý
@@ -16,6 +16,7 @@ import '../styles/WatchCandidate.css';
 
 const WatchCandidate = () => {
   const navigate = useNavigate();
+  const { jobId } = useParams(); // Lấy jobId từ URL
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(false);
   
@@ -60,6 +61,14 @@ const WatchCandidate = () => {
       setEmployerId(mockEmployerId);
     }
   }, [navigate]);
+
+  // Tự động chọn job nếu có jobId từ URL
+  useEffect(() => {
+    if (jobId) {
+      console.log('🎯 Auto-selecting job from URL:', jobId);
+      setSelectedJob(jobId);
+    }
+  }, [jobId]);
 
   useEffect(() => {
     if (!employerId) return;
