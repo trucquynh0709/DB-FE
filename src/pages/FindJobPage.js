@@ -533,12 +533,6 @@ const FindJobPage = () => {
     setError(null);
     
     try {
-      // Xây dựng query parameters - Lấy TẤT CẢ jobs, không phân trang ở BE
-      const queryParams = new URLSearchParams({
-        page: 1,
-        limit: 1000, // Lấy tất cả jobs (hoặc số đủ lớn)
-      });
-      
       // Ưu tiên dùng params từ searchParams, nếu không có thì dùng state
       const searchValue = searchParams.search !== undefined ? searchParams.search : searchTerm;
       const locationValue = searchParams.location !== undefined ? searchParams.location : location;
@@ -551,10 +545,46 @@ const FindJobPage = () => {
         salaryRange: searchParams.salaryRange !== undefined ? searchParams.salaryRange : appliedFilters.salaryRange
       };
       
+      // Xây dựng query parameters - Backend sẽ xử lý filters và pagination
+      const pageToUse = searchParams.page !== undefined ? searchParams.page : currentPage;
+      const queryParams = new URLSearchParams({
+        page: pageToUse,
+        limit: 9, // 9 jobs per page
+      });
+      
+      // Gửi search và location
       if (searchValue) queryParams.append('search', searchValue);
       if (locationValue) queryParams.append('location', locationValue);
-      // Không gửi filters lên BE vì BE không handle đúng - sẽ filter hoàn toàn ở FE
-      // Backend chỉ xử lý search và location
+      
+      // Gửi filters lên backend (hỗ trợ multiple values)
+      if (currentFilters.jobType && currentFilters.jobType.length > 0) {
+        // Express tự động parse multiple query params với cùng key thành array
+        currentFilters.jobType.forEach(type => {
+          queryParams.append('jobType', type);
+        });
+      }
+      
+      if (currentFilters.contractType && currentFilters.contractType.length > 0) {
+        currentFilters.contractType.forEach(type => {
+          queryParams.append('contractType', type);
+        });
+      }
+      
+      if (currentFilters.level && currentFilters.level.length > 0) {
+        currentFilters.level.forEach(level => {
+          queryParams.append('level', level);
+        });
+      }
+      
+      // Gửi salary range
+      if (currentFilters.salaryRange) {
+        if (currentFilters.salaryRange.min > 0) {
+          queryParams.append('salaryMin', currentFilters.salaryRange.min);
+        }
+        if (currentFilters.salaryRange.max < 100000000) {
+          queryParams.append('salaryMax', currentFilters.salaryRange.max);
+        }
+      }
       
       const response = await fetch(`${API_BASE_URL}/jobs?${queryParams}`);
       
@@ -567,55 +597,17 @@ const FindJobPage = () => {
       // Backend returns: { success: true, data: { jobs, pagination }, message }
       if (result.success && result.data) {
         console.log('API Job Data Sample:', result.data.jobs[0]); // Debug: xem cấu trúc data từ API
+        
         // Normalize job data từ API
-        let allNormalizedJobs = (result.data.jobs || [])
+        const normalizedJobs = (result.data.jobs || [])
           .map(job => normalizeJobData(job));
         
-        // Apply filters ở FE (vì BE không handle đúng)
-        // Filter jobType - OR logic (job chỉ cần match 1 trong các giá trị)
-        if (currentFilters.jobType && currentFilters.jobType.length > 0) {
-          allNormalizedJobs = allNormalizedJobs.filter(job => 
-            currentFilters.jobType.includes(job.JobType)
-          );
-        }
-        
-        // Filter contractType - OR logic
-        if (currentFilters.contractType && currentFilters.contractType.length > 0) {
-          allNormalizedJobs = allNormalizedJobs.filter(job => 
-            currentFilters.contractType.includes(job.ContractType)
-          );
-        }
-        
-        // Filter level - OR logic
-        if (currentFilters.level && currentFilters.level.length > 0) {
-          allNormalizedJobs = allNormalizedJobs.filter(job => 
-            currentFilters.level.includes(job.Level)
-          );
-        }
-        
-        // Apply salary filter
-        if (currentFilters.salaryRange && (currentFilters.salaryRange.min > 0 || currentFilters.salaryRange.max < 100000000)) {
-          allNormalizedJobs = allNormalizedJobs.filter(job => {
-            // Khoảng lương của job phải nằm trong khoảng filter (có giao nhau)
-            // Job hiển thị nếu: SalaryTo >= filter.min VÀ SalaryFrom <= filter.max
-            return job.SalaryTo >= currentFilters.salaryRange.min && 
-                   job.SalaryFrom <= currentFilters.salaryRange.max;
-          });
-        }
-        
-        // Pagination ở FE
-        const jobsPerPage = 9;
-        const totalJobs = allNormalizedJobs.length;
-        const totalPagesCalc = Math.ceil(totalJobs / jobsPerPage);
-        
-        // Ưu tiên dùng page từ searchParams, nếu không có thì dùng currentPage từ state
-        const pageToShow = searchParams.page !== undefined ? searchParams.page : currentPage;
-        const startIndex = (pageToShow - 1) * jobsPerPage;
-        const endIndex = startIndex + jobsPerPage;
-        const paginatedJobs = allNormalizedJobs.slice(startIndex, endIndex);
-        
-        setJobData(paginatedJobs);
-        setTotalPages(totalPagesCalc);
+        // Sử dụng pagination từ backend
+        const pagination = result.data.pagination || {};
+        setJobData(normalizedJobs);
+        setTotalPages(pagination.total_pages || 1);
+        // Không cập nhật currentPage ở đây để tránh infinite loop
+        // currentPage đã được set trước khi gọi fetchJobs (từ handlePageChange hoặc searchParams)
       } else {
         throw new Error('Invalid response format from server');
       }
@@ -753,7 +745,15 @@ const FindJobPage = () => {
 
   // Load jobs khi component mount hoặc page change
   useEffect(() => {
-    fetchJobs({ page: currentPage });
+    fetchJobs({ 
+      page: currentPage,
+      search: searchTerm,
+      location: location,
+      jobType: appliedFilters.jobType,
+      contractType: appliedFilters.contractType,
+      level: appliedFilters.level,
+      salaryRange: appliedFilters.salaryRange
+    });
   }, [currentPage]);
 
   // Handle search
