@@ -26,7 +26,11 @@ const JobDetails = () => {
         setLoading(true);
         
         // Fetch job details from API
-        const jobData = await fetchJobById(jobId);
+        const response = await fetchJobById(jobId);
+        console.log('Job Response:', response); // Debug: xem cấu trúc dữ liệu
+        
+        // Extract job data from response
+        const jobData = response.success ? response.data : response;
         console.log('Job Data:', jobData); // Debug: xem cấu trúc dữ liệu
         console.log('Company Data:', jobData.company); // Debug: xem thông tin company
         

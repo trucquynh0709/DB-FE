@@ -123,6 +123,22 @@ const EmployerDashboard = () => {
       });
       
       console.log('✅ Transformed jobs:', transformedJobs);
+      
+      // Tính số tin đang tuyển = tin chưa hết hạn và trạng thái Open/Active
+      const activeJobs = transformedJobs.filter(job => {
+        const isNotExpired = job.daysRemaining > 0;
+        const isOpen = job.JobStatus === 'Open' || job.JobStatus === 'Active';
+        return isNotExpired && isOpen;
+      });
+      
+      console.log('✅ Active jobs count:', activeJobs.length);
+      
+      // Cập nhật stats với số tin thực tế đang tuyển
+      setStats({
+        NumberOfOpenedJob: activeJobs.length,
+        totalFollowers: statsResult?.totalFollowers || statsResult?.savedCandidates || 0
+      });
+      
       setRecentJobs(transformedJobs);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
@@ -218,6 +234,12 @@ const EmployerDashboard = () => {
           </div>
         ) : (
           <>
+            {/* Welcome Banner */}
+            <div className="welcome-banner">
+              <h1 className="welcome-banner-title">Xin chào, {employerName}</h1>
+              <p className="welcome-banner-subtitle">Quản lý tin tuyển dụng và ứng viên của bạn</p>
+            </div>
+
             {/* Stats Cards */}
             <div className="stats-cards">
             <div className="stat-card">
@@ -243,7 +265,7 @@ const EmployerDashboard = () => {
           {/* Recently Posted Jobs */}
           <div className="recent-jobs-section">
             <div className="section-header">
-              <h2>Tin tuyển dụng gần đây</h2>
+              <h2>Tin tuyển dụng đã đăng </h2>
               <Link to="/employer/my-jobs" className="view-all">
                 Xem tất cả <ChevronRight size={16} />
               </Link>

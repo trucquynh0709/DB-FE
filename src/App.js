@@ -13,6 +13,7 @@ import SignInEmployer from "./pages/SignInEmployer";
 import PricingPlans from "./pages/EmployerPricing";
 import EmployerDashboard from "./pages/EmployerDashboard";
 import PostJob from "./pages/PostJob";
+import UpdateJob from "./pages/UpdateJob";
 import MyJob from "./pages/MyJob";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import AppliedJobs from "./pages/AppliedJob";
@@ -41,6 +42,7 @@ function App() {
         <Route path="/pricing-plans" element={<PricingPlans />} />
         <Route path="/employer-dashboard" element={<EmployerDashboard />} />
         <Route path="/employer/post-job" element={<PostJob />} />
+        <Route path="/employer/update-job/:jobId" element={<UpdateJob />} />
         <Route path="/employer/my-jobs" element={<MyJob />} />
         <Route path="/employer/watch-candidate" element={<WatchCandidate />} />
         <Route path="/employer/watch-candidate/:jobId" element={<WatchCandidate />} />
